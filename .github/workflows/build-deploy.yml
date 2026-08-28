@@ -12,22 +12,18 @@ on:
 env:
   RESOURCE_GROUP: data
   AKS_CLUSTER_NAME: bankingapp-aks
-  ACR_NAME: ${{ secrets.ACR_NAME }}
   ACR_LOGIN_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}
+  IMAGE_TAG: ${{ github.sha }}
 
 jobs:
-  build-frontend:
-    name: Build & Push Frontend Images
+  # ─────────────────────────────────────────────────────────────────────────
+  # Job 1: Build all Docker images and push to ACR
+  # ─────────────────────────────────────────────────────────────────────────
+  build:
+    name: Build & Push Images
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        service:
-          - banking-ui
-          - cards-ui
-          - transactions-ui
-          - loans-ui
     steps:
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Azure Login
@@ -35,46 +31,43 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: ACR Login
-        run: az acr login --name ${{ env.ACR_NAME }}
+      - name: Login to ACR
+        run: az acr login --name ${{ secrets.ACR_NAME }}
 
-      - name: Build and Push ${{ matrix.service }}
+      # Build all 5 images
+      - name: Build banking-ui
+        run: docker build -t ${{ env.ACR_LOGIN_SERVER }}/banking-ui:${{ env.IMAGE_TAG }} ./frontend/banking-ui
+
+      - name: Build cards-ui
+        run: docker build -t ${{ env.ACR_LOGIN_SERVER }}/cards-ui:${{ env.IMAGE_TAG }} ./frontend/cards-ui
+
+      - name: Build transactions-ui
+        run: docker build -t ${{ env.ACR_LOGIN_SERVER }}/transactions-ui:${{ env.IMAGE_TAG }} ./frontend/transactions-ui
+
+      - name: Build loans-ui
+        run: docker build -t ${{ env.ACR_LOGIN_SERVER }}/loans-ui:${{ env.IMAGE_TAG }} ./frontend/loans-ui
+
+      - name: Build backend-service
+        run: docker build -t ${{ env.ACR_LOGIN_SERVER }}/backend-service:${{ env.IMAGE_TAG }} ./backend
+
+      # Push all images
+      - name: Push all images to ACR
         run: |
-          docker build -t ${{ env.ACR_LOGIN_SERVER }}/${{ matrix.service }}:${{ github.sha }} \
-                        -t ${{ env.ACR_LOGIN_SERVER }}/${{ matrix.service }}:latest \
-                        ./frontend/${{ matrix.service }}
-          docker push ${{ env.ACR_LOGIN_SERVER }}/${{ matrix.service }}:${{ github.sha }}
-          docker push ${{ env.ACR_LOGIN_SERVER }}/${{ matrix.service }}:latest
+          docker push ${{ env.ACR_LOGIN_SERVER }}/banking-ui:${{ env.IMAGE_TAG }}
+          docker push ${{ env.ACR_LOGIN_SERVER }}/cards-ui:${{ env.IMAGE_TAG }}
+          docker push ${{ env.ACR_LOGIN_SERVER }}/transactions-ui:${{ env.IMAGE_TAG }}
+          docker push ${{ env.ACR_LOGIN_SERVER }}/loans-ui:${{ env.IMAGE_TAG }}
+          docker push ${{ env.ACR_LOGIN_SERVER }}/backend-service:${{ env.IMAGE_TAG }}
 
-  build-backend:
-    name: Build & Push Backend Image
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: ACR Login
-        run: az acr login --name ${{ env.ACR_NAME }}
-
-      - name: Build and Push backend-service
-        run: |
-          docker build -t ${{ env.ACR_LOGIN_SERVER }}/backend-service:${{ github.sha }} \
-                        -t ${{ env.ACR_LOGIN_SERVER }}/backend-service:latest \
-                        ./backend
-          docker push ${{ env.ACR_LOGIN_SERVER }}/backend-service:${{ github.sha }}
-          docker push ${{ env.ACR_LOGIN_SERVER }}/backend-service:latest
-
+  # ─────────────────────────────────────────────────────────────────────────
+  # Job 2: Deploy to AKS — updates image tags in k8s manifests automatically
+  # ─────────────────────────────────────────────────────────────────────────
   deploy:
     name: Deploy to AKS
-    needs: [build-frontend, build-backend]
+    needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Azure Login
@@ -88,12 +81,17 @@ jobs:
           resource-group: ${{ env.RESOURCE_GROUP }}
           cluster-name: ${{ env.AKS_CLUSTER_NAME }}
 
-      - name: Replace image placeholders in manifests
+      # Replace image placeholders with actual ACR image:tag
+      - name: Update image tags in K8s manifests
         run: |
-          sed -i "s|REPLACE_ACR_LOGIN_SERVER|${{ env.ACR_LOGIN_SERVER }}|g" k8s/*.yaml
-          sed -i "s|:latest|:${{ github.sha }}|g" k8s/10-banking-ui.yaml k8s/11-cards-ui.yaml k8s/12-transactions-ui.yaml k8s/13-loans-ui.yaml k8s/14-backend-service.yaml
+          sed -i "s|IMAGE_BANKING_UI|${{ env.ACR_LOGIN_SERVER }}/banking-ui:${{ env.IMAGE_TAG }}|g" k8s/04-banking-ui.yaml
+          sed -i "s|IMAGE_CARDS_UI|${{ env.ACR_LOGIN_SERVER }}/cards-ui:${{ env.IMAGE_TAG }}|g" k8s/05-cards-ui.yaml
+          sed -i "s|IMAGE_TRANSACTIONS_UI|${{ env.ACR_LOGIN_SERVER }}/transactions-ui:${{ env.IMAGE_TAG }}|g" k8s/06-transactions-ui.yaml
+          sed -i "s|IMAGE_LOANS_UI|${{ env.ACR_LOGIN_SERVER }}/loans-ui:${{ env.IMAGE_TAG }}|g" k8s/07-loans-ui.yaml
+          sed -i "s|IMAGE_BACKEND_SERVICE|${{ env.ACR_LOGIN_SERVER }}/backend-service:${{ env.IMAGE_TAG }}|g" k8s/03-backend-service.yaml
 
-      - name: Create/Update MySQL secret
+      # Create MySQL secret from GitHub Secrets
+      - name: Create MySQL secret
         run: |
           kubectl create namespace banking-app --dry-run=client -o yaml | kubectl apply -f -
           kubectl create secret generic mysql-credentials \
@@ -104,20 +102,15 @@ jobs:
             --from-literal=DB_PORT=3306 \
             --dry-run=client -o yaml | kubectl apply -f -
 
-      - name: Apply Kubernetes manifests
-        run: |
-          kubectl apply -f k8s/00-namespace.yaml
-          kubectl apply -f k8s/10-banking-ui.yaml
-          kubectl apply -f k8s/11-cards-ui.yaml
-          kubectl apply -f k8s/12-transactions-ui.yaml
-          kubectl apply -f k8s/13-loans-ui.yaml
-          kubectl apply -f k8s/14-backend-service.yaml
-          kubectl apply -f k8s/20-ingress.yaml
+      # Apply all manifests in order
+      - name: Deploy to cluster
+        run: kubectl apply -f k8s/
 
-      - name: Rollout status
+      # Wait for rollouts to complete
+      - name: Verify deployments
         run: |
+          kubectl rollout status deployment/backend-service -n banking-app --timeout=180s
           kubectl rollout status deployment/banking-ui -n banking-app --timeout=180s
           kubectl rollout status deployment/cards-ui -n banking-app --timeout=180s
           kubectl rollout status deployment/transactions-ui -n banking-app --timeout=180s
           kubectl rollout status deployment/loans-ui -n banking-app --timeout=180s
-          kubectl rollout status deployment/backend-service -n banking-app --timeout=180s

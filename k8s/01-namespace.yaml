@@ -1,0 +1,9 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Namespace for all banking-app resources
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: banking-app
+  labels:
+    app: banking-app

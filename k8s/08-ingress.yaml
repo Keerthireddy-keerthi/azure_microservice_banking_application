@@ -1,5 +1,11 @@
-# Requires the ingress-nginx controller installed in the cluster:
-# helm install ingress-nginx ingress-nginx/ingress-nginx --namespace ingress-nginx --create-namespace
+# ─────────────────────────────────────────────────────────────────────────────
+# NGINX Ingress — Routes traffic to frontend UIs
+# Backend is NOT exposed here (frontends proxy /api internally)
+# ─────────────────────────────────────────────────────────────────────────────
+# Prerequisites:
+#   helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+#   helm install ingress-nginx ingress-nginx/ingress-nginx -n ingress-nginx --create-namespace
+# ─────────────────────────────────────────────────────────────────────────────
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -11,10 +17,9 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: banking.example.com   # replace with your domain, or use the LB IP directly
+    - host: banking.example.com   # Replace with your domain or LB IP
       http:
         paths:
-          # Main homepage
           - path: /()(.*)
             pathType: ImplementationSpecific
             backend:
@@ -22,7 +27,6 @@ spec:
                 name: banking-ui
                 port:
                   number: 3000
-          # Cards frontend
           - path: /cards(/|$)(.*)
             pathType: ImplementationSpecific
             backend:
@@ -30,7 +34,6 @@ spec:
                 name: cards-ui
                 port:
                   number: 8081
-          # Transactions frontend
           - path: /transactions(/|$)(.*)
             pathType: ImplementationSpecific
             backend:
@@ -38,7 +41,6 @@ spec:
                 name: transactions-ui
                 port:
                   number: 8082
-          # Loans frontend
           - path: /loans(/|$)(.*)
             pathType: ImplementationSpecific
             backend:

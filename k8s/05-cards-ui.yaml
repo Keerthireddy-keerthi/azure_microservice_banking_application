@@ -1,3 +1,6 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Cards UI — Static frontend (nginx, port 8081)
+# ─────────────────────────────────────────────────────────────────────────────
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -5,6 +8,7 @@ metadata:
   namespace: banking-app
   labels:
     app: cards-ui
+    tier: frontend
 spec:
   replicas: 2
   selector:
@@ -14,10 +18,11 @@ spec:
     metadata:
       labels:
         app: cards-ui
+        tier: frontend
     spec:
       containers:
         - name: cards-ui
-          image: REPLACE_ACR_LOGIN_SERVER/cards-ui:latest
+          image: IMAGE_CARDS_UI
           ports:
             - containerPort: 8081
           resources:
@@ -43,6 +48,9 @@ kind: Service
 metadata:
   name: cards-ui
   namespace: banking-app
+  labels:
+    app: cards-ui
+    tier: frontend
 spec:
   selector:
     app: cards-ui

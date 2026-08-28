@@ -1,3 +1,7 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Backend Service — Node.js API connected to MySQL
+# Internal only (ClusterIP) — accessed by frontend nginx proxy_pass
+# ─────────────────────────────────────────────────────────────────────────────
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -5,6 +9,7 @@ metadata:
   namespace: banking-app
   labels:
     app: backend-service
+    tier: backend
 spec:
   replicas: 2
   selector:
@@ -14,10 +19,11 @@ spec:
     metadata:
       labels:
         app: backend-service
+        tier: backend
     spec:
       containers:
         - name: backend-service
-          image: REPLACE_ACR_LOGIN_SERVER/backend-service:latest
+          image: IMAGE_BACKEND_SERVICE
           ports:
             - containerPort: 8080
           env:
@@ -70,6 +76,9 @@ kind: Service
 metadata:
   name: backend-service
   namespace: banking-app
+  labels:
+    app: backend-service
+    tier: backend
 spec:
   selector:
     app: backend-service
