@@ -1,5 +1,5 @@
 server {
-    listen 8083;
+    listen 8082;
     server_name _;
     root /usr/share/nginx/html;
     index index.html;
@@ -9,9 +9,11 @@ server {
         try_files $uri $uri/ /index.html;
     }
 
-    # Proxy /api requests to backend-service internally within K8s cluster
+    # Proxy /api requests to the backend. BACKEND_URL is substituted at container
+    # start by the nginx image's envsubst entrypoint. NGINX_ENVSUBST_FILTER is set
+    # to BACKEND_URL so nginx's own variables ($host, $uri, ...) survive untouched.
     location /api/ {
-        proxy_pass http://backend-service.banking-app.svc.cluster.local:8080;
+        proxy_pass ${BACKEND_URL};
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -21,7 +23,7 @@ server {
     # Health check
     location /health {
         access_log off;
-        return 200 '{"status":"ok","service":"loans-ui"}';
-        add_header Content-Type application/json;
+        default_type application/json;
+        return 200 '{"status":"ok","service":"transactions-ui"}';
     }
 }

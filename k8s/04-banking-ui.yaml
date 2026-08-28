@@ -28,6 +28,12 @@ spec:
       containers:
         - name: banking-ui
           image: IMAGE_BANKING_UI
+          env:
+            - name: BACKEND_URL
+              value: "http://backend-service.banking-app.svc.cluster.local:8080"
+            # Restrict envsubst to BACKEND_URL so nginx's own $host/$uri/... survive
+            - name: NGINX_ENVSUBST_FILTER
+              value: "BACKEND_URL"
           ports:
             - containerPort: 3000
           resources:
