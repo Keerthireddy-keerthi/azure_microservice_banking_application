@@ -6,7 +6,6 @@ on:
 env:
   RESOURCE_GROUP: dev-veera-narni
   AKS_CLUSTER_NAME: bankingapp-aks
-  ACR_LOGIN_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}
   PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
   IMAGE_TAG: ${{ github.sha }}
 
@@ -17,6 +16,9 @@ jobs:
   build:
     name: Build & Push Images
     runs-on: ubuntu-latest
+    outputs:
+      acr_name: ${{ steps.get_acr.outputs.ACR_NAME }}
+      acr_login_server: ${{ steps.get_acr.outputs.ACR_LOGIN_SERVER }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -28,8 +30,18 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Get ACR details from Azure
+        id: get_acr
+        run: |
+          ACR_NAME=$(az acr list --resource-group ${{ env.RESOURCE_GROUP }} --query "[0].name" -o tsv)
+          ACR_LOGIN_SERVER=$(az acr list --resource-group ${{ env.RESOURCE_GROUP }} --query "[0].loginServer" -o tsv)
+          echo "ACR_NAME=$ACR_NAME" >> $GITHUB_OUTPUT
+          echo "ACR_LOGIN_SERVER=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
+          echo "ACR_NAME=$ACR_NAME" >> $GITHUB_ENV
+          echo "ACR_LOGIN_SERVER=$ACR_LOGIN_SERVER" >> $GITHUB_ENV
+
       - name: Login to ACR
-        run: az acr login --name ${{ secrets.ACR_NAME }}
+        run: az acr login --name ${{ steps.get_acr.outputs.ACR_NAME }}
 
       - name: Build banking-ui
         run: docker build -t ${{ env.ACR_LOGIN_SERVER }}/banking-ui:${{ env.IMAGE_TAG }} ./frontend/banking-ui
@@ -61,6 +73,8 @@ jobs:
     name: Deploy to AKS
     needs: build
     runs-on: ubuntu-latest
+    env:
+      ACR_LOGIN_SERVER: ${{ needs.build.outputs.acr_login_server }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
