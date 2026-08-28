@@ -33,3 +33,26 @@ resource "azurerm_role_assignment" "aks_acr_pull" {
   role_definition_name = "AcrPull"
   principal_id         = azurerm_kubernetes_cluster.aks.kubelet_identity[0].object_id
 }
+
+# ─────────────────────────────────────────────────────────────────────────────
+# NGINX Ingress Controller — installed via Helm on AKS
+# ─────────────────────────────────────────────────────────────────────────────
+resource "helm_release" "ingress_nginx" {
+  name             = "ingress-nginx"
+  repository       = "https://kubernetes.github.io/ingress-nginx"
+  chart            = "ingress-nginx"
+  namespace        = "ingress-nginx"
+  create_namespace = true
+
+  set {
+    name  = "controller.service.type"
+    value = "LoadBalancer"
+  }
+
+  set {
+    name  = "controller.replicaCount"
+    value = "2"
+  }
+
+  depends_on = [azurerm_kubernetes_cluster.aks]
+}
