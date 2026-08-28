@@ -3,16 +3,24 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cards - SecureBank</title>
+  <title>Cards - Veera_NareshIT_Bank</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #0f1624 0%, #1a2744 50%, #0d2137 100%); min-height: 100vh; color: #e0e6ed; }
+
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes cardFlipIn { from { opacity: 0; transform: rotateY(-90deg); } to { opacity: 1; transform: rotateY(0deg); } }
+    @keyframes ripple { to { transform: scale(3); opacity: 0; } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .ripple-btn { position: relative; overflow: hidden; }
+    .ripple-btn .ripple { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.5); transform: scale(0); animation: ripple 0.6s ease-out; pointer-events: none; }
+
     .sidebar { position: fixed; left: 0; top: 0; width: 260px; height: 100vh; background: rgba(15,22,36,0.95); backdrop-filter: blur(20px); border-right: 1px solid rgba(255,255,255,0.06); padding: 24px 0; z-index: 100; }
     .sidebar .brand { padding: 0 24px; margin-bottom: 40px; }
-    .sidebar .brand h2 { font-size: 1.4rem; background: linear-gradient(135deg, #4facfe, #00f2fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700; }
+    .sidebar .brand h2 { font-size: 1.15rem; background: linear-gradient(135deg, #4facfe, #00f2fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700; }
     .sidebar nav a { display: flex; align-items: center; gap: 12px; padding: 14px 24px; color: #7a8fa6; text-decoration: none; font-size: 0.9rem; transition: all 0.2s; border-left: 3px solid transparent; }
-    .sidebar nav a:hover { color: #e0e6ed; background: rgba(79,172,254,0.05); }
+    .sidebar nav a:hover { color: #e0e6ed; background: rgba(79,172,254,0.05); transform: translateX(4px); }
     .sidebar nav a.active { color: #4facfe; background: rgba(79,172,254,0.08); border-left-color: #4facfe; }
     .sidebar nav a .nav-icon { font-size: 1.2rem; width: 24px; text-align: center; }
     .sidebar .user-section { position: absolute; bottom: 24px; left: 0; right: 0; padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.06); }
@@ -20,18 +28,19 @@
     .sidebar .user-section .avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #4facfe, #00f2fe); display: flex; align-items: center; justify-content: center; font-weight: 600; color: #0a1628; }
     .sidebar .user-section .user-name { font-size: 0.9rem; color: #e0e6ed; }
     .sidebar .user-section .user-acc { font-size: 0.75rem; color: #7a8fa6; }
-    .sidebar .logout-btn { margin-top: 12px; width: 100%; padding: 10px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #fca5a5; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
+    .sidebar .logout-btn { margin-top: 12px; width: 100%; padding: 10px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #fca5a5; border-radius: 8px; cursor: pointer; font-size: 0.85rem; transition: all .2s; }
+    .sidebar .logout-btn:hover { background: rgba(239,68,68,0.2); }
 
-    .main-content { margin-left: 260px; padding: 32px 40px; }
-    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
-    .page-header h1 { font-size: 1.8rem; font-weight: 600; color: #fff; }
+    .main-content { margin-left: 260px; padding: 32px 40px; animation: fadeInUp 0.5s ease; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
+    .page-header h1 { font-size: 1.8rem; font-weight: 700; color: #fff; }
     .page-header p { color: #7a8fa6; margin-top: 4px; }
     .btn-add { padding: 12px 24px; background: linear-gradient(135deg, #4facfe, #00f2fe); border: none; border-radius: 12px; color: #0a1628; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s; }
     .btn-add:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(79,172,254,0.3); }
 
     .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px; }
-    .bank-card { background: linear-gradient(135deg, #1e3a5f 0%, #0f2439 100%); border: 1px solid rgba(79,172,254,0.15); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; transition: transform 0.3s; }
-    .bank-card:hover { transform: translateY(-4px); }
+    .bank-card { background: linear-gradient(135deg, #1e3a5f 0%, #0f2439 100%); border: 1px solid rgba(79,172,254,0.15); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; transition: transform 0.3s; animation: fadeInUp 0.5s ease both; }
+    .bank-card:hover { transform: translateY(-6px); }
     .bank-card::before { content: ''; position: absolute; top: -50%; right: -50%; width: 100%; height: 100%; background: radial-gradient(circle, rgba(79,172,254,0.05) 0%, transparent 70%); }
     .bank-card .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; position: relative; }
     .bank-card .card-type { font-size: 0.8rem; color: #7a8fa6; text-transform: uppercase; letter-spacing: 1px; }
@@ -52,8 +61,8 @@
     .empty-state h3 { color: #c8d6e5; margin-bottom: 8px; }
 
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; }
-    .modal-overlay.show { display: flex; }
-    .modal { background: #1a2744; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 36px; width: 90%; max-width: 440px; }
+    .modal-overlay.show { display: flex; animation: fadeIn .25s ease; }
+    .modal { background: #1a2744; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 36px; width: 90%; max-width: 440px; animation: cardFlipIn 0.4s ease; }
     .modal h3 { color: #fff; font-size: 1.3rem; margin-bottom: 24px; }
     .modal .form-group { margin-bottom: 16px; }
     .modal .form-group label { display: block; font-size: 0.85rem; color: #7a8fa6; margin-bottom: 6px; }
@@ -68,6 +77,9 @@
     .no-auth .msg h2 { color: #fff; margin-bottom: 12px; }
     .no-auth .msg a { color: #4facfe; text-decoration: none; }
 
+    .toast { position: fixed; bottom: 28px; right: 28px; z-index: 2000; padding: 16px 22px; border-radius: 14px; background: #12351f; border: 1px solid rgba(34,197,94,0.4); color: #86efac; font-size: 0.9rem; box-shadow: 0 15px 35px rgba(0,0,0,0.4); animation: fadeInUp .3s ease; display: none; }
+    .toast.error { background: #351212; border-color: rgba(239,68,68,0.4); color: #fca5a5; }
+
     @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; padding: 20px; } }
   </style>
 </head>
@@ -78,7 +90,7 @@
 
   <div id="appSection" style="display:none;">
     <aside class="sidebar">
-      <div class="brand"><h2>🏦 SecureBank</h2></div>
+      <div class="brand"><h2>🏦 Veera_NareshIT_Bank</h2></div>
       <nav>
         <a href="/"><span class="nav-icon">🏠</span> Dashboard</a>
         <a href="/cards" class="active"><span class="nav-icon">💳</span> Cards</a>
@@ -97,7 +109,7 @@
     <main class="main-content">
       <div class="page-header">
         <div><h1>My Cards</h1><p>Manage your debit and credit cards</p></div>
-        <button class="btn-add" onclick="openModal()">+ New Card</button>
+        <button class="btn-add ripple-btn" onclick="openModal()">+ New Card</button>
       </div>
       <div id="cardsContainer" class="cards-grid"></div>
     </main>
@@ -112,37 +124,62 @@
       </div>
       <div class="form-group">
         <label>Card Network</label>
-        <select id="cardNetwork"><option value="VISA">Visa</option><option value="MASTERCARD">Mastercard</option><option value="RUPAY">RuPay</option></select>
+        <select id="cardNetwork"><option value="RUPAY">RuPay</option><option value="VISA">Visa</option><option value="MASTERCARD">Mastercard</option></select>
       </div>
       <div class="modal-actions">
         <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-        <button class="btn-submit" onclick="requestCard()">Request Card</button>
+        <button class="btn-submit ripple-btn" onclick="requestCard()">Request Card</button>
       </div>
     </div>
   </div>
 
+  <div id="toast" class="toast"></div>
+
   <script>
     const API = '/api';
     let user = JSON.parse(localStorage.getItem('user') || 'null');
+    let account = JSON.parse(localStorage.getItem('account') || 'null');
 
-    function handleLogout() { localStorage.removeItem('user'); window.location.href = '/'; }
+    document.addEventListener('click', function (e) {
+      const btn = e.target.closest('.ripple-btn');
+      if (!btn) return;
+      const rect = btn.getBoundingClientRect();
+      const ripple = document.createElement('span');
+      const size = Math.max(rect.width, rect.height);
+      ripple.className = 'ripple';
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+      ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+      btn.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 650);
+    });
+
+    function showToast(message, isError) {
+      const t = document.getElementById('toast');
+      t.textContent = message;
+      t.className = 'toast' + (isError ? ' error' : '');
+      t.style.display = 'block';
+      setTimeout(() => { t.style.display = 'none'; }, 3500);
+    }
+
+    function handleLogout() { localStorage.removeItem('user'); localStorage.removeItem('account'); window.location.href = '/'; }
     function openModal() { document.getElementById('cardModal').classList.add('show'); }
     function closeModal() { document.getElementById('cardModal').classList.remove('show'); }
 
     async function loadCards() {
       try {
-        const res = await fetch(`${API}/cards/${user.account_id}`);
+        const res = await fetch(`${API}/cards/${account.id}`);
         const cards = await res.json();
         const container = document.getElementById('cardsContainer');
-        if (cards.length === 0) {
+        if (!Array.isArray(cards) || cards.length === 0) {
           container.innerHTML = '<div class="empty-state"><div class="empty-icon">💳</div><h3>No Cards Yet</h3><p>Request your first card to get started</p></div>';
           return;
         }
-        container.innerHTML = cards.map(c => `
-          <div class="bank-card">
+        container.innerHTML = cards.map((c, i) => `
+          <div class="bank-card" style="animation-delay:${i * 0.08}s">
             <div class="card-header">
               <span class="card-type">${c.card_type} Card</span>
-              <span class="card-network">${c.card_network || 'VISA'}</span>
+              <span class="card-network">${c.card_network || 'RUPAY'}</span>
             </div>
             <div class="card-number">${c.card_number_masked}</div>
             <div class="card-footer">
@@ -164,24 +201,31 @@
         const res = await fetch(`${API}/cards`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ account_id: user.account_id, card_type, card_network })
+          body: JSON.stringify({ account_id: account.id, card_type, card_network })
         });
-        if (res.ok) { closeModal(); loadCards(); }
-      } catch (e) { console.error(e); }
+        const data = await res.json();
+        if (res.ok && data.success) {
+          closeModal(); loadCards();
+          showToast('Card issued successfully!');
+        } else {
+          showToast(data.message || 'Failed to issue card', true);
+        }
+      } catch (e) { console.error(e); showToast('Something went wrong', true); }
     }
 
     async function blockCard(id) {
       if (!confirm('Are you sure you want to block this card?')) return;
       await fetch(`${API}/cards/${id}/block`, { method: 'PATCH' });
+      showToast('Card blocked');
       loadCards();
     }
 
-    if (!user) {
+    if (!user || !account) {
       document.getElementById('noAuth').style.display = 'flex';
     } else {
       document.getElementById('appSection').style.display = 'block';
       document.getElementById('userName').textContent = user.full_name;
-      document.getElementById('userAccount').textContent = user.account_id;
+      document.getElementById('userAccount').textContent = account.account_number;
       document.getElementById('userAvatar').textContent = user.full_name.charAt(0).toUpperCase();
       loadCards();
     }

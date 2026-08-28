@@ -3,16 +3,24 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Loans - SecureBank</title>
+  <title>Loans - Veera_NareshIT_Bank</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #0f1624 0%, #1a2744 50%, #0d2137 100%); min-height: 100vh; color: #e0e6ed; }
+
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes cardFlipIn { from { opacity: 0; transform: rotateY(-90deg); } to { opacity: 1; transform: rotateY(0deg); } }
+    @keyframes ripple { to { transform: scale(3); opacity: 0; } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .ripple-btn { position: relative; overflow: hidden; }
+    .ripple-btn .ripple { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.5); transform: scale(0); animation: ripple 0.6s ease-out; pointer-events: none; }
+
     .sidebar { position: fixed; left: 0; top: 0; width: 260px; height: 100vh; background: rgba(15,22,36,0.95); backdrop-filter: blur(20px); border-right: 1px solid rgba(255,255,255,0.06); padding: 24px 0; z-index: 100; }
     .sidebar .brand { padding: 0 24px; margin-bottom: 40px; }
-    .sidebar .brand h2 { font-size: 1.4rem; background: linear-gradient(135deg, #4facfe, #00f2fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700; }
+    .sidebar .brand h2 { font-size: 1.15rem; background: linear-gradient(135deg, #4facfe, #00f2fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700; }
     .sidebar nav a { display: flex; align-items: center; gap: 12px; padding: 14px 24px; color: #7a8fa6; text-decoration: none; font-size: 0.9rem; transition: all 0.2s; border-left: 3px solid transparent; }
-    .sidebar nav a:hover { color: #e0e6ed; background: rgba(79,172,254,0.05); }
+    .sidebar nav a:hover { color: #e0e6ed; background: rgba(79,172,254,0.05); transform: translateX(4px); }
     .sidebar nav a.active { color: #4facfe; background: rgba(79,172,254,0.08); border-left-color: #4facfe; }
     .sidebar nav a .nav-icon { font-size: 1.2rem; width: 24px; text-align: center; }
     .sidebar .user-section { position: absolute; bottom: 24px; left: 0; right: 0; padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.06); }
@@ -20,18 +28,19 @@
     .sidebar .user-section .avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #4facfe, #00f2fe); display: flex; align-items: center; justify-content: center; font-weight: 600; color: #0a1628; }
     .sidebar .user-section .user-name { font-size: 0.9rem; color: #e0e6ed; }
     .sidebar .user-section .user-acc { font-size: 0.75rem; color: #7a8fa6; }
-    .sidebar .logout-btn { margin-top: 12px; width: 100%; padding: 10px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #fca5a5; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
+    .sidebar .logout-btn { margin-top: 12px; width: 100%; padding: 10px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #fca5a5; border-radius: 8px; cursor: pointer; font-size: 0.85rem; transition: all .2s; }
+    .sidebar .logout-btn:hover { background: rgba(239,68,68,0.2); }
 
-    .main-content { margin-left: 260px; padding: 32px 40px; }
-    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
-    .page-header h1 { font-size: 1.8rem; font-weight: 600; color: #fff; }
+    .main-content { margin-left: 260px; padding: 32px 40px; animation: fadeInUp 0.5s ease; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
+    .page-header h1 { font-size: 1.8rem; font-weight: 700; color: #fff; }
     .page-header p { color: #7a8fa6; margin-top: 4px; }
     .btn-add { padding: 12px 24px; background: linear-gradient(135deg, #4facfe, #00f2fe); border: none; border-radius: 12px; color: #0a1628; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s; }
     .btn-add:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(79,172,254,0.3); }
 
     .loans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 24px; }
-    .loan-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 28px; transition: transform 0.3s; }
-    .loan-card:hover { transform: translateY(-3px); }
+    .loan-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 28px; transition: transform 0.3s; animation: fadeInUp .5s ease both; }
+    .loan-card:hover { transform: translateY(-4px); }
     .loan-card .loan-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     .loan-card .loan-type { font-size: 0.8rem; color: #7a8fa6; text-transform: uppercase; letter-spacing: 0.5px; }
     .loan-card .loan-id { font-size: 0.75rem; color: #5a6a80; }
@@ -40,6 +49,7 @@
     .status-approved { background: rgba(34,197,94,0.12); color: #34d399; }
     .status-rejected { background: rgba(239,68,68,0.12); color: #f87171; }
     .status-active { background: rgba(79,172,254,0.12); color: #4facfe; }
+    .status-closed { background: rgba(148,163,184,0.12); color: #94a3b8; }
 
     .loan-amount { font-size: 2rem; font-weight: 700; color: #fff; margin-bottom: 20px; }
     .loan-details { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
@@ -48,31 +58,36 @@
     .loan-progress { margin-top: 16px; }
     .loan-progress .label { font-size: 0.75rem; color: #7a8fa6; margin-bottom: 8px; display: flex; justify-content: space-between; }
     .progress-bar { height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
-    .progress-bar .fill { height: 100%; background: linear-gradient(135deg, #4facfe, #00f2fe); border-radius: 4px; transition: width 0.5s; }
+    .progress-bar .fill { height: 100%; background: linear-gradient(135deg, #4facfe, #00f2fe); border-radius: 4px; transition: width 0.8s ease; }
 
     .empty-state { text-align: center; padding: 80px 40px; color: #7a8fa6; }
     .empty-state .empty-icon { font-size: 4rem; margin-bottom: 16px; opacity: 0.4; }
     .empty-state h3 { color: #c8d6e5; margin-bottom: 8px; }
 
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; }
-    .modal-overlay.show { display: flex; }
-    .modal { background: #1a2744; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 36px; width: 90%; max-width: 500px; }
+    .modal-overlay.show { display: flex; animation: fadeIn .25s ease; }
+    .modal { background: #1a2744; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 36px; width: 90%; max-width: 500px; animation: cardFlipIn 0.4s ease; max-height: 88vh; overflow-y: auto; }
     .modal h3 { color: #fff; font-size: 1.3rem; margin-bottom: 24px; }
     .modal .form-group { margin-bottom: 16px; }
     .modal .form-group label { display: block; font-size: 0.85rem; color: #7a8fa6; margin-bottom: 6px; }
-    .modal .form-group select, .modal .form-group input { width: 100%; padding: 12px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 0.9rem; }
+    .modal .form-group select, .modal .form-group input { width: 100%; padding: 12px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 0.9rem; transition: all .2s; }
+    .modal .form-group input:focus, .modal .form-group select:focus { outline: none; border-color: #4facfe; box-shadow: 0 0 0 3px rgba(79,172,254,0.12); }
     .modal .form-group select option { background: #1a2744; }
-    .modal .emi-preview { background: rgba(79,172,254,0.05); border: 1px solid rgba(79,172,254,0.15); border-radius: 12px; padding: 16px; margin-top: 16px; }
+    .modal .emi-preview { background: rgba(79,172,254,0.05); border: 1px solid rgba(79,172,254,0.15); border-radius: 12px; padding: 16px; margin-top: 16px; animation: fadeIn .3s ease; }
     .modal .emi-preview .emi-label { font-size: 0.8rem; color: #7a8fa6; }
     .modal .emi-preview .emi-value { font-size: 1.4rem; font-weight: 700; color: #4facfe; margin-top: 4px; }
     .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
     .modal-actions .btn-cancel { flex: 1; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #7a8fa6; cursor: pointer; }
     .modal-actions .btn-submit { flex: 1; padding: 12px; background: linear-gradient(135deg, #4facfe, #00f2fe); border: none; border-radius: 10px; color: #0a1628; font-weight: 600; cursor: pointer; }
+    .error-msg { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; font-size: 0.85rem; display: none; }
 
     .no-auth { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
     .no-auth .msg { text-align: center; }
     .no-auth .msg h2 { color: #fff; margin-bottom: 12px; }
     .no-auth .msg a { color: #4facfe; text-decoration: none; }
+
+    .toast { position: fixed; bottom: 28px; right: 28px; z-index: 2000; padding: 16px 22px; border-radius: 14px; background: #12351f; border: 1px solid rgba(34,197,94,0.4); color: #86efac; font-size: 0.9rem; box-shadow: 0 15px 35px rgba(0,0,0,0.4); animation: fadeInUp .3s ease; display: none; }
+    .toast.error { background: #351212; border-color: rgba(239,68,68,0.4); color: #fca5a5; }
 
     @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; padding: 20px; } .loans-grid { grid-template-columns: 1fr; } }
   </style>
@@ -84,7 +99,7 @@
 
   <div id="appSection" style="display:none;">
     <aside class="sidebar">
-      <div class="brand"><h2>🏦 SecureBank</h2></div>
+      <div class="brand"><h2>🏦 Veera_NareshIT_Bank</h2></div>
       <nav>
         <a href="/"><span class="nav-icon">🏠</span> Dashboard</a>
         <a href="/cards"><span class="nav-icon">💳</span> Cards</a>
@@ -103,7 +118,7 @@
     <main class="main-content">
       <div class="page-header">
         <div><h1>Loans</h1><p>Apply and manage your loans</p></div>
-        <button class="btn-add" onclick="openModal()">+ Apply for Loan</button>
+        <button class="btn-add ripple-btn" onclick="openModal()">+ Apply for Loan</button>
       </div>
       <div id="loansContainer" class="loans-grid"></div>
     </main>
@@ -112,6 +127,7 @@
   <div id="loanModal" class="modal-overlay">
     <div class="modal">
       <h3>Apply for a Loan</h3>
+      <div id="loanError" class="error-msg"></div>
       <div class="form-group">
         <label>Loan Type</label>
         <select id="loanType"><option value="PERSONAL">Personal Loan</option><option value="HOME">Home Loan</option><option value="VEHICLE">Vehicle Loan</option><option value="EDUCATION">Education Loan</option><option value="BUSINESS">Business Loan</option></select>
@@ -135,18 +151,43 @@
       </div>
       <div class="modal-actions">
         <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-        <button class="btn-submit" onclick="applyLoan()">Submit Application</button>
+        <button class="btn-submit ripple-btn" onclick="applyLoan()">Submit Application</button>
       </div>
     </div>
   </div>
 
+  <div id="toast" class="toast"></div>
+
   <script>
     const API = '/api';
     let user = JSON.parse(localStorage.getItem('user') || 'null');
+    let account = JSON.parse(localStorage.getItem('account') || 'null');
 
-    function handleLogout() { localStorage.removeItem('user'); window.location.href = '/'; }
+    document.addEventListener('click', function (e) {
+      const btn = e.target.closest('.ripple-btn');
+      if (!btn) return;
+      const rect = btn.getBoundingClientRect();
+      const ripple = document.createElement('span');
+      const size = Math.max(rect.width, rect.height);
+      ripple.className = 'ripple';
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+      ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+      btn.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 650);
+    });
+
+    function showToast(message, isError) {
+      const t = document.getElementById('toast');
+      t.textContent = message;
+      t.className = 'toast' + (isError ? ' error' : '');
+      t.style.display = 'block';
+      setTimeout(() => { t.style.display = 'none'; }, 3500);
+    }
+
+    function handleLogout() { localStorage.removeItem('user'); localStorage.removeItem('account'); window.location.href = '/'; }
     function openModal() { document.getElementById('loanModal').classList.add('show'); }
-    function closeModal() { document.getElementById('loanModal').classList.remove('show'); }
+    function closeModal() { document.getElementById('loanModal').classList.remove('show'); document.getElementById('loanError').style.display = 'none'; }
 
     function calculateEMI() {
       const P = parseFloat(document.getElementById('loanPrincipal').value);
@@ -167,19 +208,19 @@
 
     async function loadLoans() {
       try {
-        const res = await fetch(`${API}/loans/${user.account_id}`);
+        const res = await fetch(`${API}/loans/${account.id}`);
         const loans = await res.json();
         const container = document.getElementById('loansContainer');
 
-        if (loans.length === 0) {
+        if (!Array.isArray(loans) || loans.length === 0) {
           container.innerHTML = '<div class="empty-state"><div class="empty-icon">🏦</div><h3>No Loans Yet</h3><p>Apply for your first loan to get started</p></div>';
           return;
         }
 
-        container.innerHTML = loans.map(l => {
+        container.innerHTML = loans.map((l, i) => {
           const progress = l.total_payable > 0 ? (parseFloat(l.amount_paid) / parseFloat(l.total_payable) * 100) : 0;
           return `
-          <div class="loan-card">
+          <div class="loan-card" style="animation-delay:${i * 0.08}s">
             <div class="loan-header">
               <div><div class="loan-type">${l.loan_type} Loan</div><div class="loan-id">Loan #${l.id}</div></div>
               <span class="loan-status status-${l.status.toLowerCase()}">${l.status}</span>
@@ -205,26 +246,35 @@
       const principal = parseFloat(document.getElementById('loanPrincipal').value);
       const interest_rate = parseFloat(document.getElementById('loanRate').value);
       const tenure_months = parseInt(document.getElementById('loanTenure').value);
+      const errEl = document.getElementById('loanError');
+      errEl.style.display = 'none';
 
-      if (!principal || principal < 10000) { alert('Minimum loan amount is ₹10,000'); return; }
-      if (!interest_rate || !tenure_months) return;
+      if (!principal || principal < 10000) { errEl.textContent = 'Minimum loan amount is ₹10,000'; errEl.style.display = 'block'; return; }
+      if (!interest_rate || !tenure_months) { errEl.textContent = 'Please fill in all loan details'; errEl.style.display = 'block'; return; }
 
       try {
         const res = await fetch(`${API}/loans`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ account_id: user.account_id, loan_type, principal, interest_rate, tenure_months })
+          body: JSON.stringify({ account_id: account.id, loan_type, principal, interest_rate, tenure_months })
         });
-        if (res.ok) { closeModal(); loadLoans(); document.getElementById('loanPrincipal').value = ''; }
-      } catch (e) { console.error(e); }
+        const data = await res.json();
+        if (res.ok && data.success) {
+          closeModal(); loadLoans();
+          document.getElementById('loanPrincipal').value = '';
+          showToast('Loan application submitted successfully!');
+        } else {
+          errEl.textContent = data.message || 'Loan application failed'; errEl.style.display = 'block';
+        }
+      } catch (e) { console.error(e); errEl.textContent = 'Something went wrong'; errEl.style.display = 'block'; }
     }
 
-    if (!user) {
+    if (!user || !account) {
       document.getElementById('noAuth').style.display = 'flex';
     } else {
       document.getElementById('appSection').style.display = 'block';
       document.getElementById('userName').textContent = user.full_name;
-      document.getElementById('userAccount').textContent = user.account_id;
+      document.getElementById('userAccount').textContent = account.account_number;
       document.getElementById('userAvatar').textContent = user.full_name.charAt(0).toUpperCase();
       loadLoans();
     }
