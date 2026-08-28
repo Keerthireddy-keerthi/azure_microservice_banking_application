@@ -42,7 +42,7 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # Create Storage Account for Terraform state if it doesn't exist
+      # Create Storage Account and resourse group for Terraform state if it doesn't exist
       - name: Create Terraform state storage (if not exists)
         run: |
           # Check if resource group exists, create if not
