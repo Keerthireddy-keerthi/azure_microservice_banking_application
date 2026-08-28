@@ -38,7 +38,7 @@ variable "aks_node_count" {
 
 variable "aks_vm_size" {
   type    = string
-  default = "standard_b2s_v2"
+  default = "Standard_D2ads_v7"
 }
 
 variable "mysql_admin_username" {

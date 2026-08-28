@@ -11,13 +11,12 @@ terraform {
     }
   }
 
-  # Uncomment and configure for remote state (recommended)
-  # backend "azurerm" {
-  #   resource_group_name  = "tfstate-rg"
-  #   storage_account_name = "tfstatebankingapp"
-  #   container_name       = "tfstate"
-  #   key                  = "banking-app.tfstate"
-  # }
+  backend "azurerm" {
+    resource_group_name  = "dev-veera-narni"
+    storage_account_name = "vaboraterraformstate"
+    container_name       = "tfstate"
+    key                  = "banking-app.tfstate"
+  }
 }
 
 provider "azurerm" {
