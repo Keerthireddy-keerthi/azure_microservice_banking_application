@@ -115,7 +115,7 @@ jobs:
           cd $GITHUB_WORKSPACE
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git remote set-url origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
+          git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git
           git add k8s/02-configmap.yaml
           git commit -m "Update configmap with MySQL connection details from Terraform" || echo "No changes to commit"
           git push
