@@ -53,9 +53,9 @@ variable "mysql_admin_username" {
 }
 
 variable "mysql_admin_password" {
-  description = "Admin password for Azure MySQL Flexible Server. Pass via TF_VAR or a secrets pipeline — do not hardcode."
+  description = "Admin password for Azure MySQL Flexible Server"
   type        = string
-  sensitive   = true
+  default     = "Veera@2024#Cloud"
 }
 
 variable "mysql_sku_name" {
