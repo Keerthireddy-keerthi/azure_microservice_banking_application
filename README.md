@@ -72,10 +72,11 @@ You need a Service Principal so GitHub Actions can access your Azure subscriptio
 
 ```bash
 # az login
-az role assignment create \
-  --assignee "banking-app-cicd" \
-  --role "Owner" \
-  --scope "/subscriptions/<YOUR_SUBSCRIPTION_ID>"
+az ad sp create-for-rbac \
+  --name "banking-app-cicd" \
+  --role Owner \
+  --scopes /subscriptions/<YOUR_SUBSCRIPTION_ID> \
+  --sdk-auth
 ```
 
 This outputs a JSON like:
