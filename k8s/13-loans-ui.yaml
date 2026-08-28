@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loans-ui
+  namespace: banking-app
+  labels:
+    app: loans-ui
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: loans-ui
+  template:
+    metadata:
+      labels:
+        app: loans-ui
+    spec:
+      containers:
+        - name: loans-ui
+          image: REPLACE_ACR_LOGIN_SERVER/loans-ui:latest
+          ports:
+            - containerPort: 8083
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8083
+            initialDelaySeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8083
+            initialDelaySeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: loans-ui
+  namespace: banking-app
+spec:
+  selector:
+    app: loans-ui
+  ports:
+    - port: 8083
+      targetPort: 8083
+  type: ClusterIP

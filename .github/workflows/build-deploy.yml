@@ -1,0 +1,123 @@
+name: Build and Deploy to AKS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+      - 'k8s/**'
+  workflow_dispatch: {}
+
+env:
+  RESOURCE_GROUP: data
+  AKS_CLUSTER_NAME: bankingapp-aks
+  ACR_NAME: ${{ secrets.ACR_NAME }}
+  ACR_LOGIN_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}
+
+jobs:
+  build-frontend:
+    name: Build & Push Frontend Images
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - banking-ui
+          - cards-ui
+          - transactions-ui
+          - loans-ui
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: ACR Login
+        run: az acr login --name ${{ env.ACR_NAME }}
+
+      - name: Build and Push ${{ matrix.service }}
+        run: |
+          docker build -t ${{ env.ACR_LOGIN_SERVER }}/${{ matrix.service }}:${{ github.sha }} \
+                        -t ${{ env.ACR_LOGIN_SERVER }}/${{ matrix.service }}:latest \
+                        ./frontend/${{ matrix.service }}
+          docker push ${{ env.ACR_LOGIN_SERVER }}/${{ matrix.service }}:${{ github.sha }}
+          docker push ${{ env.ACR_LOGIN_SERVER }}/${{ matrix.service }}:latest
+
+  build-backend:
+    name: Build & Push Backend Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: ACR Login
+        run: az acr login --name ${{ env.ACR_NAME }}
+
+      - name: Build and Push backend-service
+        run: |
+          docker build -t ${{ env.ACR_LOGIN_SERVER }}/backend-service:${{ github.sha }} \
+                        -t ${{ env.ACR_LOGIN_SERVER }}/backend-service:latest \
+                        ./backend
+          docker push ${{ env.ACR_LOGIN_SERVER }}/backend-service:${{ github.sha }}
+          docker push ${{ env.ACR_LOGIN_SERVER }}/backend-service:latest
+
+  deploy:
+    name: Deploy to AKS
+    needs: [build-frontend, build-backend]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set AKS context
+        uses: azure/aks-set-context@v4
+        with:
+          resource-group: ${{ env.RESOURCE_GROUP }}
+          cluster-name: ${{ env.AKS_CLUSTER_NAME }}
+
+      - name: Replace image placeholders in manifests
+        run: |
+          sed -i "s|REPLACE_ACR_LOGIN_SERVER|${{ env.ACR_LOGIN_SERVER }}|g" k8s/*.yaml
+          sed -i "s|:latest|:${{ github.sha }}|g" k8s/10-banking-ui.yaml k8s/11-cards-ui.yaml k8s/12-transactions-ui.yaml k8s/13-loans-ui.yaml k8s/14-backend-service.yaml
+
+      - name: Create/Update MySQL secret
+        run: |
+          kubectl create namespace banking-app --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create secret generic mysql-credentials \
+            --namespace banking-app \
+            --from-literal=DB_HOST=${{ secrets.MYSQL_FQDN }} \
+            --from-literal=DB_USER=${{ secrets.MYSQL_ADMIN_USERNAME }} \
+            --from-literal=DB_PASSWORD=${{ secrets.MYSQL_ADMIN_PASSWORD }} \
+            --from-literal=DB_PORT=3306 \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Apply Kubernetes manifests
+        run: |
+          kubectl apply -f k8s/00-namespace.yaml
+          kubectl apply -f k8s/10-banking-ui.yaml
+          kubectl apply -f k8s/11-cards-ui.yaml
+          kubectl apply -f k8s/12-transactions-ui.yaml
+          kubectl apply -f k8s/13-loans-ui.yaml
+          kubectl apply -f k8s/14-backend-service.yaml
+          kubectl apply -f k8s/20-ingress.yaml
+
+      - name: Rollout status
+        run: |
+          kubectl rollout status deployment/banking-ui -n banking-app --timeout=180s
+          kubectl rollout status deployment/cards-ui -n banking-app --timeout=180s
+          kubectl rollout status deployment/transactions-ui -n banking-app --timeout=180s
+          kubectl rollout status deployment/loans-ui -n banking-app --timeout=180s
+          kubectl rollout status deployment/backend-service -n banking-app --timeout=180s

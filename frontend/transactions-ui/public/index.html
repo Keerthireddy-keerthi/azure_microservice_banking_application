@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transactions - SecureBank</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #0f1624 0%, #1a2744 50%, #0d2137 100%); min-height: 100vh; color: #e0e6ed; }
+    .sidebar { position: fixed; left: 0; top: 0; width: 260px; height: 100vh; background: rgba(15,22,36,0.95); backdrop-filter: blur(20px); border-right: 1px solid rgba(255,255,255,0.06); padding: 24px 0; z-index: 100; }
+    .sidebar .brand { padding: 0 24px; margin-bottom: 40px; }
+    .sidebar .brand h2 { font-size: 1.4rem; background: linear-gradient(135deg, #4facfe, #00f2fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700; }
+    .sidebar nav a { display: flex; align-items: center; gap: 12px; padding: 14px 24px; color: #7a8fa6; text-decoration: none; font-size: 0.9rem; transition: all 0.2s; border-left: 3px solid transparent; }
+    .sidebar nav a:hover { color: #e0e6ed; background: rgba(79,172,254,0.05); }
+    .sidebar nav a.active { color: #4facfe; background: rgba(79,172,254,0.08); border-left-color: #4facfe; }
+    .sidebar nav a .nav-icon { font-size: 1.2rem; width: 24px; text-align: center; }
+    .sidebar .user-section { position: absolute; bottom: 24px; left: 0; right: 0; padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .sidebar .user-section .user-info { display: flex; align-items: center; gap: 12px; }
+    .sidebar .user-section .avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #4facfe, #00f2fe); display: flex; align-items: center; justify-content: center; font-weight: 600; color: #0a1628; }
+    .sidebar .user-section .user-name { font-size: 0.9rem; color: #e0e6ed; }
+    .sidebar .user-section .user-acc { font-size: 0.75rem; color: #7a8fa6; }
+    .sidebar .logout-btn { margin-top: 12px; width: 100%; padding: 10px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #fca5a5; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
+
+    .main-content { margin-left: 260px; padding: 32px 40px; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+    .page-header h1 { font-size: 1.8rem; font-weight: 600; color: #fff; }
+    .page-header p { color: #7a8fa6; margin-top: 4px; }
+    .btn-add { padding: 12px 24px; background: linear-gradient(135deg, #4facfe, #00f2fe); border: none; border-radius: 12px; color: #0a1628; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+    .btn-add:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(79,172,254,0.3); }
+
+    .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
+    .summary-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 20px; }
+    .summary-card .label { font-size: 0.8rem; color: #7a8fa6; margin-bottom: 6px; }
+    .summary-card .value { font-size: 1.5rem; font-weight: 700; }
+    .summary-card .value.credit { color: #34d399; }
+    .summary-card .value.debit { color: #f87171; }
+    .summary-card .value.total { color: #4facfe; }
+
+    .txn-table { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; overflow: hidden; }
+    .txn-table-header { display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr 1fr; padding: 14px 24px; background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 0.8rem; color: #7a8fa6; text-transform: uppercase; letter-spacing: 0.5px; }
+    .txn-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr 1fr; padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.03); align-items: center; transition: background 0.2s; }
+    .txn-row:hover { background: rgba(79,172,254,0.03); }
+    .txn-row:last-child { border-bottom: none; }
+    .txn-desc { display: flex; align-items: center; gap: 12px; }
+    .txn-desc .icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+    .txn-desc .icon.credit { background: rgba(34,197,94,0.1); }
+    .txn-desc .icon.debit { background: rgba(239,68,68,0.1); }
+    .txn-desc .text { font-size: 0.9rem; color: #e0e6ed; }
+    .txn-desc .ref { font-size: 0.7rem; color: #5a6a80; }
+    .txn-category { font-size: 0.8rem; color: #7a8fa6; padding: 4px 10px; background: rgba(255,255,255,0.04); border-radius: 6px; display: inline-block; }
+    .txn-type { font-size: 0.8rem; padding: 4px 10px; border-radius: 6px; font-weight: 500; }
+    .txn-type.credit { background: rgba(34,197,94,0.1); color: #34d399; }
+    .txn-type.debit { background: rgba(239,68,68,0.1); color: #f87171; }
+    .txn-date { font-size: 0.8rem; color: #7a8fa6; }
+    .txn-amount { font-weight: 600; font-size: 0.95rem; text-align: right; }
+    .txn-amount.credit { color: #34d399; }
+    .txn-amount.debit { color: #f87171; }
+
+    .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 20px; }
+    .pagination button { padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: #7a8fa6; cursor: pointer; }
+    .pagination button:hover { color: #fff; border-color: #4facfe; }
+    .pagination button.active { background: #4facfe; color: #0a1628; border-color: #4facfe; }
+
+    .empty-state { text-align: center; padding: 60px; color: #7a8fa6; }
+    .empty-state .empty-icon { font-size: 3.5rem; margin-bottom: 16px; opacity: 0.4; }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: #1a2744; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 36px; width: 90%; max-width: 480px; }
+    .modal h3 { color: #fff; font-size: 1.3rem; margin-bottom: 24px; }
+    .modal .form-group { margin-bottom: 16px; }
+    .modal .form-group label { display: block; font-size: 0.85rem; color: #7a8fa6; margin-bottom: 6px; }
+    .modal .form-group select, .modal .form-group input { width: 100%; padding: 12px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 0.9rem; }
+    .modal .form-group select option { background: #1a2744; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
+    .modal-actions .btn-cancel { flex: 1; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #7a8fa6; cursor: pointer; }
+    .modal-actions .btn-submit { flex: 1; padding: 12px; background: linear-gradient(135deg, #4facfe, #00f2fe); border: none; border-radius: 10px; color: #0a1628; font-weight: 600; cursor: pointer; }
+
+    .no-auth { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .no-auth .msg { text-align: center; }
+    .no-auth .msg h2 { color: #fff; margin-bottom: 12px; }
+    .no-auth .msg a { color: #4facfe; text-decoration: none; }
+
+    @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; padding: 20px; } .txn-table-header, .txn-row { grid-template-columns: 2fr 1fr 1fr; } }
+  </style>
+</head>
+<body>
+  <div id="noAuth" class="no-auth" style="display:none;">
+    <div class="msg"><h2>Please sign in first</h2><a href="/">Go to Login</a></div>
+  </div>
+
+  <div id="appSection" style="display:none;">
+    <aside class="sidebar">
+      <div class="brand"><h2>🏦 SecureBank</h2></div>
+      <nav>
+        <a href="/"><span class="nav-icon">🏠</span> Dashboard</a>
+        <a href="/cards"><span class="nav-icon">💳</span> Cards</a>
+        <a href="/transactions" class="active"><span class="nav-icon">📊</span> Transactions</a>
+        <a href="/loans"><span class="nav-icon">🏦</span> Loans</a>
+      </nav>
+      <div class="user-section">
+        <div class="user-info">
+          <div class="avatar" id="userAvatar">U</div>
+          <div><div class="user-name" id="userName">User</div><div class="user-acc" id="userAccount">-</div></div>
+        </div>
+        <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="page-header">
+        <div><h1>Transactions</h1><p>Track all your account activity</p></div>
+        <button class="btn-add" onclick="openModal()">+ New Transaction</button>
+      </div>
+      <div class="summary-cards" id="summaryCards"></div>
+      <div class="txn-table">
+        <div class="txn-table-header">
+          <span>Description</span><span>Category</span><span>Type</span><span>Date</span><span style="text-align:right">Amount</span>
+        </div>
+        <div id="txnList"></div>
+      </div>
+      <div class="pagination" id="pagination"></div>
+    </main>
+  </div>
+
+  <div id="txnModal" class="modal-overlay">
+    <div class="modal">
+      <h3>Record Transaction</h3>
+      <div class="form-group">
+        <label>Type</label>
+        <select id="txnType"><option value="DEBIT">Debit (Expense)</option><option value="CREDIT">Credit (Income)</option></select>
+      </div>
+      <div class="form-group">
+        <label>Amount (₹)</label>
+        <input type="number" id="txnAmount" placeholder="0.00" min="1" />
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="txnCategory">
+          <option value="SHOPPING">Shopping</option><option value="FOOD">Food & Dining</option>
+          <option value="TRANSPORT">Transport</option><option value="BILLS">Bills & Utilities</option>
+          <option value="SALARY">Salary</option><option value="TRANSFER">Transfer</option>
+          <option value="ENTERTAINMENT">Entertainment</option><option value="GENERAL">General</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <input type="text" id="txnDesc" placeholder="E.g., Monthly salary, Grocery shopping" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="btn-submit" onclick="addTransaction()">Add Transaction</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = '/api';
+    let user = JSON.parse(localStorage.getItem('user') || 'null');
+    const PAGE_SIZE = 15;
+
+    function handleLogout() { localStorage.removeItem('user'); window.location.href = '/'; }
+    function openModal() { document.getElementById('txnModal').classList.add('show'); }
+    function closeModal() { document.getElementById('txnModal').classList.remove('show'); }
+
+    async function loadTransactions(offset = 0) {
+      try {
+        const res = await fetch(`${API}/transactions/${user.account_id}?limit=${PAGE_SIZE}&offset=${offset}`);
+        const data = await res.json();
+        const list = document.getElementById('txnList');
+
+        let totalCredit = 0, totalDebit = 0;
+        data.transactions.forEach(t => { if (t.type === 'CREDIT') totalCredit += parseFloat(t.amount); else totalDebit += parseFloat(t.amount); });
+        document.getElementById('summaryCards').innerHTML = `
+          <div class="summary-card"><div class="label">Total Transactions</div><div class="value total">${data.total}</div></div>
+          <div class="summary-card"><div class="label">Credits (This Page)</div><div class="value credit">+₹${totalCredit.toLocaleString()}</div></div>
+          <div class="summary-card"><div class="label">Debits (This Page)</div><div class="value debit">-₹${totalDebit.toLocaleString()}</div></div>`;
+
+        if (data.transactions.length === 0) {
+          list.innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><p>No transactions yet. Add your first transaction!</p></div>';
+          return;
+        }
+
+        list.innerHTML = data.transactions.map(t => `
+          <div class="txn-row">
+            <div class="txn-desc">
+              <div class="icon ${t.type.toLowerCase()}">${t.type === 'CREDIT' ? '↓' : '↑'}</div>
+              <div><div class="text">${t.description || t.category || '-'}</div><div class="ref">${t.reference_id || ''}</div></div>
+            </div>
+            <span class="txn-category">${t.category || 'GENERAL'}</span>
+            <span class="txn-type ${t.type.toLowerCase()}">${t.type}</span>
+            <span class="txn-date">${new Date(t.created_at).toLocaleString()}</span>
+            <span class="txn-amount ${t.type.toLowerCase()}">${t.type === 'CREDIT' ? '+' : '-'}₹${parseFloat(t.amount).toLocaleString()}</span>
+          </div>`).join('');
+
+        const totalPages = Math.ceil(data.total / PAGE_SIZE);
+        const currentPageNum = Math.floor(offset / PAGE_SIZE);
+        let paginationHtml = '';
+        for (let i = 0; i < totalPages && i < 10; i++) {
+          paginationHtml += `<button class="${i === currentPageNum ? 'active' : ''}" onclick="loadTransactions(${i * PAGE_SIZE})">${i + 1}</button>`;
+        }
+        document.getElementById('pagination').innerHTML = paginationHtml;
+      } catch (e) { console.error(e); }
+    }
+
+    async function addTransaction() {
+      const type = document.getElementById('txnType').value;
+      const amount = document.getElementById('txnAmount').value;
+      const category = document.getElementById('txnCategory').value;
+      const description = document.getElementById('txnDesc').value;
+      if (!amount || amount <= 0) return;
+
+      try {
+        const res = await fetch(`${API}/transactions`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ account_id: user.account_id, amount: parseFloat(amount), type, category, description })
+        });
+        if (res.ok) { closeModal(); loadTransactions(0); document.getElementById('txnAmount').value = ''; document.getElementById('txnDesc').value = ''; }
+      } catch (e) { console.error(e); }
+    }
+
+    if (!user) {
+      document.getElementById('noAuth').style.display = 'flex';
+    } else {
+      document.getElementById('appSection').style.display = 'block';
+      document.getElementById('userName').textContent = user.full_name;
+      document.getElementById('userAccount').textContent = user.account_id;
+      document.getElementById('userAvatar').textContent = user.full_name.charAt(0).toUpperCase();
+      loadTransactions(0);
+    }
+  </script>
+</body>
+</html>

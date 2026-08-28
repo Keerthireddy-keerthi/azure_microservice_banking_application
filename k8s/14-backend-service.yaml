@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-service
+  namespace: banking-app
+  labels:
+    app: backend-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend-service
+  template:
+    metadata:
+      labels:
+        app: backend-service
+    spec:
+      containers:
+        - name: backend-service
+          image: REPLACE_ACR_LOGIN_SERVER/backend-service:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: CARDS_DB_NAME
+              value: "cards_db"
+            - name: TRANSACTIONS_DB_NAME
+              value: "transactions_db"
+            - name: LOANS_DB_NAME
+              value: "loans_db"
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-credentials
+                  key: DB_HOST
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-credentials
+                  key: DB_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-credentials
+                  key: DB_PASSWORD
+            - name: DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-credentials
+                  key: DB_PORT
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: banking-app
+spec:
+  selector:
+    app: backend-service
+  ports:
+    - port: 8080
+      targetPort: 8080
+  type: ClusterIP

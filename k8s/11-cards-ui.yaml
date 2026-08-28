@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cards-ui
+  namespace: banking-app
+  labels:
+    app: cards-ui
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cards-ui
+  template:
+    metadata:
+      labels:
+        app: cards-ui
+    spec:
+      containers:
+        - name: cards-ui
+          image: REPLACE_ACR_LOGIN_SERVER/cards-ui:latest
+          ports:
+            - containerPort: 8081
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8081
+            initialDelaySeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8081
+            initialDelaySeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cards-ui
+  namespace: banking-app
+spec:
+  selector:
+    app: cards-ui
+  ports:
+    - port: 8081
+      targetPort: 8081
+  type: ClusterIP

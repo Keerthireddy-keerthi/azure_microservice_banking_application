@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: banking-ui
+  namespace: banking-app
+  labels:
+    app: banking-ui
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: banking-ui
+  template:
+    metadata:
+      labels:
+        app: banking-ui
+    spec:
+      containers:
+        - name: banking-ui
+          image: REPLACE_ACR_LOGIN_SERVER/banking-ui:latest
+          ports:
+            - containerPort: 3000
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: banking-ui
+  namespace: banking-app
+spec:
+  selector:
+    app: banking-ui
+  ports:
+    - port: 3000
+      targetPort: 3000
+  type: ClusterIP
