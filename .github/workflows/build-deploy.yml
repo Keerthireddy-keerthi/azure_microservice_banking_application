@@ -7,6 +7,7 @@ env:
   RESOURCE_GROUP: dev-veera-narni
   AKS_CLUSTER_NAME: bankingapp-aks
   ACR_LOGIN_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}
+  PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
   IMAGE_TAG: ${{ github.sha }}
 
 jobs:
@@ -19,6 +20,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Azure Login
         uses: azure/login@v2
@@ -61,6 +64,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Azure Login
         uses: azure/login@v2
