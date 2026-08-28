@@ -38,13 +38,7 @@ variable "aks_node_count" {
 
 variable "aks_vm_size" {
   type    = string
-  default = "Standard_DS2_v2"
-}
-
-variable "kubernetes_version" {
-  description = "Set explicitly to a supported AKS version, or leave null for latest"
-  type        = string
-  default     = null
+  default = "Standard_B2s"
 }
 
 variable "mysql_admin_username" {

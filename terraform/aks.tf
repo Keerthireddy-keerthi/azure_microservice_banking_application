@@ -3,7 +3,6 @@ resource "azurerm_kubernetes_cluster" "aks" {
   location            = azurerm_resource_group.data.location
   resource_group_name = azurerm_resource_group.data.name
   dns_prefix          = "${var.project_name}-aks"
-  kubernetes_version  = var.kubernetes_version
 
   default_node_pool {
     name           = "system"
@@ -18,7 +17,6 @@ resource "azurerm_kubernetes_cluster" "aks" {
 
   network_profile {
     network_plugin = "azure"
-    network_policy = "azure"
     service_cidr   = "10.20.0.0/16"
     dns_service_ip = "10.20.0.10"
   }
@@ -30,6 +28,3 @@ resource "azurerm_role_assignment" "aks_acr_pull" {
   role_definition_name = "AcrPull"
   principal_id         = azurerm_kubernetes_cluster.aks.kubelet_identity[0].object_id
 }
-
-# NGINX ingress controller service will be installed via Helm/kubectl in CD pipeline,
-# not via Terraform, to keep infra and app deployment layers separate.
