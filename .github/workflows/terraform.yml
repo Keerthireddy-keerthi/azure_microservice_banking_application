@@ -25,6 +25,8 @@ jobs:
   terraform:
     name: Terraform ${{ github.event.inputs.action }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     defaults:
       run:
         working-directory: terraform
