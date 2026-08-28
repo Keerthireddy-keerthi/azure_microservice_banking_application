@@ -294,6 +294,34 @@
 
     @media (max-width: 1100px) { .grid-2 { grid-template-columns: 1fr; } }
 
+    /* ---------- Top announcement bar (horizontal marquee) ---------- */
+    .announce-bar { position: fixed; top: 0; left: 0; right: 0; height: 36px; z-index: 420; display: flex; align-items: center; overflow: hidden; color: #06131f; font-size: 0.82rem; font-weight: 700; letter-spacing: .2px; background: linear-gradient(90deg, #4facfe, #00f2fe, #a855f7, #4facfe); background-size: 300% auto; animation: gradientShift 9s linear infinite; }
+    .announce-track { display: flex; gap: 64px; width: max-content; animation: marquee 24s linear infinite; will-change: transform; }
+    .announce-bar:hover .announce-track { animation-play-state: paused; }
+    .announce-track span { white-space: nowrap; display: inline-flex; align-items: center; gap: 8px; }
+    .announce-track span b { background: rgba(6,19,31,0.16); padding: 2px 9px; border-radius: 20px; font-weight: 800; }
+    .announce-close { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; border-radius: 50%; border: none; background: rgba(6,19,31,0.18); color: #06131f; font-size: 0.72rem; cursor: pointer; line-height: 1; }
+    .announce-close:hover { background: rgba(6,19,31,0.38); color: #fff; }
+
+    /* offsets applied only while the bar is visible */
+    body.has-announce .landing-nav { top: 36px; }
+    body.has-announce .scroll-progress { top: 36px; }
+    body.has-announce .hero { padding-top: 186px; }
+    /* keep the bar visible inside the dashboard too */
+    body.has-announce .app-container { padding-top: 36px; }
+    body.has-announce .sidebar { top: 36px; height: calc(100vh - 36px); }
+    body.has-announce .topbar { top: 36px; }
+    @media (max-width: 700px) {
+      .announce-bar { height: 32px; font-size: 0.72rem; }
+      .announce-track { gap: 40px; animation-duration: 18s; }
+      body.has-announce .landing-nav { top: 32px; }
+      body.has-announce .scroll-progress { top: 32px; }
+      body.has-announce .hero { padding-top: 158px; }
+      body.has-announce .app-container { padding-top: 32px; }
+      body.has-announce .sidebar { top: 32px; height: calc(100vh - 32px); }
+      body.has-announce .topbar { top: 32px; }
+    }
+
     /* ---------- Scroll progress bar (transform-only, GPU cheap) ---------- */
     .scroll-progress { position: fixed; top: 0; left: 0; height: 3px; width: 100%; z-index: 400; background: linear-gradient(90deg, #4facfe, #00f2fe, #a855f7); transform: scaleX(0); transform-origin: 0 50%; will-change: transform; }
 
@@ -477,6 +505,12 @@
   </style>
 </head>
 <body>
+
+  <!-- Top announcement marquee -->
+  <div class="announce-bar" id="announceBar">
+    <div class="announce-track" id="announceTrack"></div>
+    <button class="announce-close" onclick="dismissAnnounce()" title="Dismiss" aria-label="Dismiss announcement">✕</button>
+  </div>
 
   <div class="scroll-progress" id="scrollProgress"></div>
   <button class="to-top" id="toTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">↑</button>
@@ -1187,6 +1221,28 @@
       const wasOpen = item.classList.contains('open');
       document.querySelectorAll('.faq.open').forEach(f => f.classList.remove('open'));
       if (!wasOpen) item.classList.add('open');
+    }
+
+    /* ---------- Top announcement marquee ---------- */
+    const ANNOUNCE_ITEMS = [
+      '🚀 New Multi-Cloud DevOps batch is starting from <b>This Monday</b> ...!!',
+      '☁️ Multi-Cloud DevOps by Veera Sir — NareshIT',
+      '📞 Limited seats — enroll now for the new batch',
+      '🎓 Azure · AWS · GCP · Kubernetes · Terraform · CI/CD'
+    ];
+    function buildAnnounce() {
+      const bar = document.getElementById('announceBar');
+      const track = document.getElementById('announceTrack');
+      if (!bar || !track) return;
+      if (localStorage.getItem('announceDismissed') === '1') { bar.style.display = 'none'; return; }
+      const html = ANNOUNCE_ITEMS.map(t => `<span>${t}</span>`).join('');
+      track.innerHTML = html + html; // duplicated for the seamless -50% loop
+      document.body.classList.add('has-announce');
+    }
+    function dismissAnnounce() {
+      localStorage.setItem('announceDismissed', '1');
+      document.getElementById('announceBar').style.display = 'none';
+      document.body.classList.remove('has-announce');
     }
 
     const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2256,6 +2312,7 @@
     }
 
     /* ---------- Init ---------- */
+    buildAnnounce();   // announcement bar shows on the landing page and inside the dashboard
     if (user && account) {
       showDashboard();
     } else {
