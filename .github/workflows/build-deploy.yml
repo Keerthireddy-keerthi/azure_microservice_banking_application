@@ -34,7 +34,6 @@ jobs:
       - name: Login to ACR
         run: az acr login --name ${{ secrets.ACR_NAME }}
 
-      # Build all 5 images
       - name: Build banking-ui
         run: docker build -t ${{ env.ACR_LOGIN_SERVER }}/banking-ui:${{ env.IMAGE_TAG }} ./frontend/banking-ui
 
@@ -50,7 +49,6 @@ jobs:
       - name: Build backend-service
         run: docker build -t ${{ env.ACR_LOGIN_SERVER }}/backend-service:${{ env.IMAGE_TAG }} ./backend
 
-      # Push all images
       - name: Push all images to ACR
         run: |
           docker push ${{ env.ACR_LOGIN_SERVER }}/banking-ui:${{ env.IMAGE_TAG }}
@@ -60,7 +58,7 @@ jobs:
           docker push ${{ env.ACR_LOGIN_SERVER }}/backend-service:${{ env.IMAGE_TAG }}
 
   # ─────────────────────────────────────────────────────────────────────────
-  # Job 2: Deploy to AKS — updates image tags in k8s manifests automatically
+  # Job 2: Deploy to AKS
   # ─────────────────────────────────────────────────────────────────────────
   deploy:
     name: Deploy to AKS
@@ -81,7 +79,6 @@ jobs:
           resource-group: ${{ env.RESOURCE_GROUP }}
           cluster-name: ${{ env.AKS_CLUSTER_NAME }}
 
-      # Replace image placeholders with actual ACR image:tag
       - name: Update image tags in K8s manifests
         run: |
           sed -i "s|IMAGE_BANKING_UI|${{ env.ACR_LOGIN_SERVER }}/banking-ui:${{ env.IMAGE_TAG }}|g" k8s/04-banking-ui.yaml
@@ -90,23 +87,9 @@ jobs:
           sed -i "s|IMAGE_LOANS_UI|${{ env.ACR_LOGIN_SERVER }}/loans-ui:${{ env.IMAGE_TAG }}|g" k8s/07-loans-ui.yaml
           sed -i "s|IMAGE_BACKEND_SERVICE|${{ env.ACR_LOGIN_SERVER }}/backend-service:${{ env.IMAGE_TAG }}|g" k8s/03-backend-service.yaml
 
-      # Create MySQL secret from GitHub Secrets
-      - name: Create MySQL secret
-        run: |
-          kubectl create namespace banking-app --dry-run=client -o yaml | kubectl apply -f -
-          kubectl create secret generic mysql-credentials \
-            --namespace banking-app \
-            --from-literal=DB_HOST=${{ secrets.MYSQL_HOST }} \
-            --from-literal=DB_USER=${{ secrets.MYSQL_ADMIN_USERNAME }} \
-            --from-literal=DB_PASSWORD=${{ secrets.MYSQL_ADMIN_PASSWORD }} \
-            --from-literal=DB_PORT=3306 \
-            --dry-run=client -o yaml | kubectl apply -f -
-
-      # Apply all manifests in order
       - name: Deploy to cluster
         run: kubectl apply -f k8s/
 
-      # Wait for rollouts to complete
       - name: Verify deployments
         run: |
           kubectl rollout status deployment/backend-service -n banking-app --timeout=180s

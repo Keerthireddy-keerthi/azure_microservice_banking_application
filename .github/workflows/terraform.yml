@@ -22,7 +22,6 @@ env:
   ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
   ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
   ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-  TF_VAR_mysql_admin_password: ${{ secrets.MYSQL_ADMIN_PASSWORD }}
 
 jobs:
   terraform:
@@ -40,6 +39,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.7.5"
+          terraform_wrapper: false
 
       - name: Terraform Init
         run: terraform init
@@ -55,9 +55,47 @@ jobs:
         run: terraform plan -out=tfplan
 
       - name: Terraform Apply
-        if: github.event.inputs.action == 'apply' || github.event.inputs.action == '' 
+        if: github.event.inputs.action == 'apply' || github.event.inputs.action == ''
         run: terraform apply -auto-approve tfplan
 
       - name: Terraform Destroy
         if: github.event.inputs.action == 'destroy'
         run: terraform destroy -auto-approve
+
+      # ─────────────────────────────────────────────────────────────────────
+      # After Terraform Apply — auto-create ConfigMap on AKS with MySQL info
+      # ─────────────────────────────────────────────────────────────────────
+      - name: Azure Login
+        if: github.event.inputs.action != 'destroy'
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Get Terraform Outputs
+        if: github.event.inputs.action != 'destroy'
+        id: tf_output
+        run: |
+          echo "MYSQL_HOST=$(terraform output -raw mysql_fqdn)" >> $GITHUB_OUTPUT
+          echo "MYSQL_USER=$(terraform output -raw mysql_admin_username)" >> $GITHUB_OUTPUT
+          echo "MYSQL_PASSWORD=$(terraform output -raw mysql_admin_password)" >> $GITHUB_OUTPUT
+          echo "AKS_CLUSTER=$(terraform output -raw aks_cluster_name)" >> $GITHUB_OUTPUT
+          echo "RESOURCE_GROUP=$(terraform output -raw resource_group_name)" >> $GITHUB_OUTPUT
+
+      - name: Set AKS Context
+        if: github.event.inputs.action != 'destroy'
+        uses: azure/aks-set-context@v4
+        with:
+          resource-group: ${{ steps.tf_output.outputs.RESOURCE_GROUP }}
+          cluster-name: ${{ steps.tf_output.outputs.AKS_CLUSTER }}
+
+      - name: Create/Update MySQL ConfigMap on AKS
+        if: github.event.inputs.action != 'destroy'
+        run: |
+          kubectl create namespace banking-app --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create configmap mysql-config \
+            --namespace banking-app \
+            --from-literal=DB_HOST=${{ steps.tf_output.outputs.MYSQL_HOST }} \
+            --from-literal=DB_USER=${{ steps.tf_output.outputs.MYSQL_USER }} \
+            --from-literal=DB_PASSWORD=${{ steps.tf_output.outputs.MYSQL_PASSWORD }} \
+            --from-literal=DB_PORT=3306 \
+            --dry-run=client -o yaml | kubectl apply -f -

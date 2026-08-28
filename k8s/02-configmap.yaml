@@ -1,15 +1,14 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# MySQL credentials secret (created via CI/CD, this is a reference template)
-# Do NOT commit real values — CI/CD creates this secret from GitHub Secrets
+# MySQL ConfigMap — Auto-created by Terraform workflow after infra provisioning
+# Do NOT edit manually — values are populated from terraform output
 # ─────────────────────────────────────────────────────────────────────────────
 apiVersion: v1
-kind: Secret
+kind: ConfigMap
 metadata:
-  name: mysql-credentials
+  name: mysql-config
   namespace: banking-app
-type: Opaque
-stringData:
-  DB_HOST: "REPLACE_MYSQL_FQDN"
+data:
+  DB_HOST: "REPLACE_MYSQL_HOST"
   DB_USER: "REPLACE_DB_USER"
   DB_PASSWORD: "REPLACE_DB_PASSWORD"
   DB_PORT: "3306"

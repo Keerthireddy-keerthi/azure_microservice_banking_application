@@ -26,6 +26,9 @@ spec:
           image: IMAGE_BACKEND_SERVICE
           ports:
             - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: mysql-config
           env:
             - name: CARDS_DB_NAME
               value: "cards_db"
@@ -33,26 +36,6 @@ spec:
               value: "transactions_db"
             - name: LOANS_DB_NAME
               value: "loans_db"
-            - name: DB_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: mysql-credentials
-                  key: DB_HOST
-            - name: DB_USER
-              valueFrom:
-                secretKeyRef:
-                  name: mysql-credentials
-                  key: DB_USER
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mysql-credentials
-                  key: DB_PASSWORD
-            - name: DB_PORT
-              valueFrom:
-                secretKeyRef:
-                  name: mysql-credentials
-                  key: DB_PORT
           resources:
             requests:
               cpu: "200m"
