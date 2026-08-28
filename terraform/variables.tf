@@ -68,6 +68,12 @@ variable "mysql_version" {
   default = "8.0.21"
 }
 
+variable "db_name" {
+  description = "Name of the application database used by the backend service"
+  type        = string
+  default     = "veera_nareshit_bank_db"
+}
+
 variable "acr_sku" {
   type    = string
   default = "Standard"

@@ -12,3 +12,4 @@ data:
   DB_USER: "bankadmin"
   DB_PASSWORD: "Veera@2024#Cloud"
   DB_PORT: "3306"
+  DB_NAME: "veera_nareshit_bank_db"

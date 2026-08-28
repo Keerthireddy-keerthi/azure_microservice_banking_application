@@ -34,13 +34,6 @@ spec:
           envFrom:
             - configMapRef:
                 name: mysql-config
-          env:
-            - name: CARDS_DB_NAME
-              value: "cards_db"
-            - name: TRANSACTIONS_DB_NAME
-              value: "transactions_db"
-            - name: LOANS_DB_NAME
-              value: "loans_db"
           resources:
             requests:
               cpu: "200m"
