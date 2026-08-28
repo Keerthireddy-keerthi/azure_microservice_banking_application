@@ -1148,6 +1148,36 @@ app.post('/api/cards', async (req, res) => {
   }
 });
 
+// GET /api/cards/:id/reveal
+// Returns the full (unmasked) card number for a single card.
+// NOTE: like every other route in this app, this is unauthenticated — see README security notes.
+app.get('/api/cards/:id/reveal', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [cards] = await pool.execute('SELECT card_number, expiry_date, card_type, card_network FROM cards WHERE id = ?', [id]);
+
+    if (cards.length === 0) {
+      return res.status(404).json({ success: false, message: 'Card not found' });
+    }
+
+    const c = cards[0];
+    res.json({
+      success: true,
+      card: {
+        id: Number(id),
+        card_number: c.card_number,
+        card_number_formatted: c.card_number.replace(/(\d{4})(?=\d)/g, '$1 '),
+        expiry_date: c.expiry_date,
+        card_type: c.card_type,
+        card_network: c.card_network
+      }
+    });
+  } catch (error) {
+    console.error('Reveal card error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
 // PATCH /api/cards/:id/block
 app.patch('/api/cards/:id/block', async (req, res) => {
   try {
@@ -1158,9 +1188,26 @@ app.patch('/api/cards/:id/block', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Card not found' });
     }
 
-    res.json({ success: true, message: 'Card blocked successfully' });
+    res.json({ success: true, message: 'Card blocked successfully', status: 'BLOCKED' });
   } catch (error) {
     console.error('Block card error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// PATCH /api/cards/:id/unblock
+app.patch('/api/cards/:id/unblock', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [result] = await pool.execute("UPDATE cards SET status = 'ACTIVE' WHERE id = ?", [id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'Card not found' });
+    }
+
+    res.json({ success: true, message: 'Card unblocked successfully', status: 'ACTIVE' });
+  } catch (error) {
+    console.error('Unblock card error:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
