@@ -11,6 +11,7 @@ on:
         options:
           - plan
           - apply
+          - destroy
 
 env:
   ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -85,11 +86,16 @@ jobs:
         run: terraform validate
 
       - name: Terraform Plan
+        if: github.event.inputs.action != 'destroy'
         run: terraform plan -out=tfplan
 
       - name: Terraform Apply
         if: github.event.inputs.action == 'apply'
         run: terraform apply -auto-approve tfplan
+
+      - name: Terraform Destroy
+        if: github.event.inputs.action == 'destroy'
+        run: terraform destroy -auto-approve
 
       # ─────────────────────────────────────────────────────────────────────
       # After Apply — Update ConfigMap yaml with real MySQL values
