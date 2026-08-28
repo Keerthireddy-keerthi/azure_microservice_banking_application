@@ -12,7 +12,7 @@ terraform {
   }
 
   backend "azurerm" {
-    resource_group_name  = "dev-veera-narni"
+    resource_group_name  = "terraform-state-rg"
     storage_account_name = "vaboraterraformstate"
     container_name       = "tfstate"
     key                  = "banking-app.tfstate"
