@@ -71,11 +71,11 @@ k8s/                     # Kubernetes manifests
 You need a Service Principal so GitHub Actions can access your Azure subscription.
 
 ```bash
-az login
-az ad sp create-for-rbac --name "banking-app-cicd" \
-  --role Contributor \
-  --scopes /subscriptions/<YOUR_SUBSCRIPTION_ID> \
-  --sdk-auth
+# az login
+az role assignment create \
+  --assignee "banking-app-cicd" \
+  --role "Owner" \
+  --scope "/subscriptions/<YOUR_SUBSCRIPTION_ID>"
 ```
 
 This outputs a JSON like:
