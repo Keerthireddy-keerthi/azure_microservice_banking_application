@@ -97,3 +97,20 @@ jobs:
           kubectl rollout status deployment/cards-ui -n banking-app --timeout=180s
           kubectl rollout status deployment/transactions-ui -n banking-app --timeout=180s
           kubectl rollout status deployment/loans-ui -n banking-app --timeout=180s
+
+      - name: Print Application URL
+        run: |
+          echo "============================================"
+          echo "  ✅ Deployment Successful!"
+          echo "============================================"
+          LB_IP=$(kubectl get svc ingress-nginx-controller -n ingress-nginx -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          echo ""
+          echo "  🌐 Application URL: http://$LB_IP"
+          echo ""
+          echo "  📄 Pages:"
+          echo "     Home:          http://$LB_IP"
+          echo "     Cards:         http://$LB_IP/cards"
+          echo "     Transactions:  http://$LB_IP/transactions"
+          echo "     Loans:         http://$LB_IP/loans"
+          echo ""
+          echo "============================================"
