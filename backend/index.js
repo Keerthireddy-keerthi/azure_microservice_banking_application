@@ -15,12 +15,15 @@ const PORT = process.env.PORT || 8080;
 let pool;
 
 async function initializeDatabase() {
+  const sslConfig = process.env.DB_SSL === 'false' ? undefined : { rejectUnauthorized: true };
+
   // First connect without database to create it if needed
   const tempConnection = await mysql.createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT || 3306
+    port: process.env.DB_PORT || 3306,
+    ssl: sslConfig
   });
 
   await tempConnection.execute(`CREATE DATABASE IF NOT EXISTS \`${process.env.DB_NAME || 'banking_db'}\``);
@@ -33,6 +36,7 @@ async function initializeDatabase() {
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT || 3306,
     database: process.env.DB_NAME || 'banking_db',
+    ssl: sslConfig,
     waitForConnections: true,
     connectionLimit: 20,
     queueLimit: 0
