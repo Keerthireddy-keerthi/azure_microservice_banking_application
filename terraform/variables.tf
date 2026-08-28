@@ -7,7 +7,7 @@ variable "resource_group_name" {
 variable "location" {
   description = "Azure region"
   type        = string
-  default     = "centralindia"
+  default     = "eastus"
 }
 
 variable "project_name" {
@@ -38,7 +38,7 @@ variable "aks_node_count" {
 
 variable "aks_vm_size" {
   type    = string
-  default = "Standard_B2s"
+  default = "standard_b2s_v2"
 }
 
 variable "mysql_admin_username" {
