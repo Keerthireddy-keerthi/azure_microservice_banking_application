@@ -22,8 +22,6 @@ resource "azurerm_kubernetes_cluster" "aks" {
     service_cidr   = "10.20.0.0/16"
     dns_service_ip = "10.20.0.10"
   }
-
-  tags = var.tags
 }
 
 # Allow AKS's managed identity (kubelet identity) to pull from ACR

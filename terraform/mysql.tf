@@ -16,8 +16,6 @@ resource "azurerm_mysql_flexible_server" "mysql" {
 
   depends_on = [azurerm_private_dns_zone_virtual_network_link.mysql_dns_link]
 
-  tags = var.tags
-
   lifecycle {
     ignore_changes = [zone]
   }

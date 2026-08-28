@@ -1,7 +1,7 @@
 variable "resource_group_name" {
-  description = "Name of the resource group (Pluralsight demo naming: 'data')"
+  description = "Name of the resource group"
   type        = string
-  default     = "data"
+  default     = "dev-veera-narni"
 }
 
 variable "location" {
@@ -79,11 +79,4 @@ variable "acr_sku" {
   default = "Standard"
 }
 
-variable "tags" {
-  type = map(string)
-  default = {
-    environment = "demo"
-    project     = "banking-microservices"
-    source      = "pluralsight"
-  }
-}
+

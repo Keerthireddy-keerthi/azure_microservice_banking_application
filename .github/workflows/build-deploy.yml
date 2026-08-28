@@ -4,7 +4,7 @@ on:
   workflow_dispatch: {}
 
 env:
-  RESOURCE_GROUP: data
+  RESOURCE_GROUP: dev-veera-narni
   AKS_CLUSTER_NAME: bankingapp-aks
   ACR_LOGIN_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}
   IMAGE_TAG: ${{ github.sha }}

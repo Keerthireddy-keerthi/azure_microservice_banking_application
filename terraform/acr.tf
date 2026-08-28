@@ -10,5 +10,4 @@ resource "azurerm_container_registry" "acr" {
   location            = azurerm_resource_group.data.location
   sku                 = var.acr_sku
   admin_enabled       = false
-  tags                = var.tags
 }
