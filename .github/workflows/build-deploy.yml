@@ -96,7 +96,7 @@ jobs:
           kubectl create namespace banking-app --dry-run=client -o yaml | kubectl apply -f -
           kubectl create secret generic mysql-credentials \
             --namespace banking-app \
-            --from-literal=DB_HOST=${{ secrets.MYSQL_FQDN }} \
+            --from-literal=DB_HOST=${{ secrets.MYSQL_HOST }} \
             --from-literal=DB_USER=${{ secrets.MYSQL_ADMIN_USERNAME }} \
             --from-literal=DB_PASSWORD=${{ secrets.MYSQL_ADMIN_PASSWORD }} \
             --from-literal=DB_PORT=3306 \
