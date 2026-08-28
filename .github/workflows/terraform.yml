@@ -50,7 +50,7 @@ jobs:
         run: terraform apply -auto-approve tfplan
 
       # ─────────────────────────────────────────────────────────────────────
-      # After Apply — Update ConfigMap with real MySQL values and apply to AKS
+      # After Apply — Update ConfigMap yaml with real MySQL values from output
       # ─────────────────────────────────────────────────────────────────────
       - name: Get Terraform Outputs
         if: github.event.inputs.action == 'apply'
@@ -59,28 +59,21 @@ jobs:
           echo "MYSQL_HOST=$(terraform output -raw mysql_fqdn)" >> $GITHUB_OUTPUT
           echo "MYSQL_USER=$(terraform output -raw mysql_admin_username)" >> $GITHUB_OUTPUT
           echo "MYSQL_PASSWORD=$(terraform output -raw mysql_admin_password)" >> $GITHUB_OUTPUT
-          echo "AKS_CLUSTER=$(terraform output -raw aks_cluster_name)" >> $GITHUB_OUTPUT
-          echo "RESOURCE_GROUP=$(terraform output -raw resource_group_name)" >> $GITHUB_OUTPUT
 
-      - name: Azure Login
-        if: github.event.inputs.action == 'apply'
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Set AKS Context
-        if: github.event.inputs.action == 'apply'
-        uses: azure/aks-set-context@v4
-        with:
-          resource-group: ${{ steps.tf_output.outputs.RESOURCE_GROUP }}
-          cluster-name: ${{ steps.tf_output.outputs.AKS_CLUSTER }}
-
-      - name: Update ConfigMap and apply to AKS
+      - name: Update ConfigMap yaml with MySQL values
         if: github.event.inputs.action == 'apply'
         run: |
           cd $GITHUB_WORKSPACE
           sed -i "s|REPLACE_MYSQL_HOST|${{ steps.tf_output.outputs.MYSQL_HOST }}|g" k8s/02-configmap.yaml
           sed -i "s|REPLACE_DB_USER|${{ steps.tf_output.outputs.MYSQL_USER }}|g" k8s/02-configmap.yaml
           sed -i "s|REPLACE_DB_PASSWORD|${{ steps.tf_output.outputs.MYSQL_PASSWORD }}|g" k8s/02-configmap.yaml
-          kubectl apply -f k8s/01-namespace.yaml
-          kubectl apply -f k8s/02-configmap.yaml
+
+      - name: Commit updated ConfigMap
+        if: github.event.inputs.action == 'apply'
+        run: |
+          cd $GITHUB_WORKSPACE
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add k8s/02-configmap.yaml
+          git commit -m "Update configmap with MySQL connection details from Terraform"
+          git push
