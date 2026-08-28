@@ -1,10 +1,6 @@
 name: Terraform - Provision Azure Infra
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'terraform/**'
   workflow_dispatch:
     inputs:
       action:
@@ -15,7 +11,6 @@ on:
         options:
           - plan
           - apply
-          - destroy
 
 env:
   ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -25,7 +20,7 @@ env:
 
 jobs:
   terraform:
-    name: Terraform ${{ github.event.inputs.action || 'apply' }}
+    name: Terraform ${{ github.event.inputs.action }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -44,10 +39,6 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-      - name: Terraform Format Check
-        run: terraform fmt -check -recursive
-        continue-on-error: true
-
       - name: Terraform Validate
         run: terraform validate
 
@@ -55,18 +46,14 @@ jobs:
         run: terraform plan -out=tfplan
 
       - name: Terraform Apply
-        if: github.event.inputs.action == 'apply' || github.event.inputs.action == ''
+        if: github.event.inputs.action == 'apply'
         run: terraform apply -auto-approve tfplan
-
-      - name: Terraform Destroy
-        if: github.event.inputs.action == 'destroy'
-        run: terraform destroy -auto-approve
 
       # ─────────────────────────────────────────────────────────────────────
       # After Apply — Update ConfigMap with real MySQL values and apply to AKS
       # ─────────────────────────────────────────────────────────────────────
       - name: Get Terraform Outputs
-        if: github.event.inputs.action != 'destroy'
+        if: github.event.inputs.action == 'apply'
         id: tf_output
         run: |
           echo "MYSQL_HOST=$(terraform output -raw mysql_fqdn)" >> $GITHUB_OUTPUT
@@ -76,24 +63,24 @@ jobs:
           echo "RESOURCE_GROUP=$(terraform output -raw resource_group_name)" >> $GITHUB_OUTPUT
 
       - name: Azure Login
-        if: github.event.inputs.action != 'destroy'
+        if: github.event.inputs.action == 'apply'
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Set AKS Context
-        if: github.event.inputs.action != 'destroy'
+        if: github.event.inputs.action == 'apply'
         uses: azure/aks-set-context@v4
         with:
           resource-group: ${{ steps.tf_output.outputs.RESOURCE_GROUP }}
           cluster-name: ${{ steps.tf_output.outputs.AKS_CLUSTER }}
 
-      - name: Update ConfigMap with MySQL values and apply
-        if: github.event.inputs.action != 'destroy'
+      - name: Update ConfigMap and apply to AKS
+        if: github.event.inputs.action == 'apply'
         run: |
           cd $GITHUB_WORKSPACE
           sed -i "s|REPLACE_MYSQL_HOST|${{ steps.tf_output.outputs.MYSQL_HOST }}|g" k8s/02-configmap.yaml
           sed -i "s|REPLACE_DB_USER|${{ steps.tf_output.outputs.MYSQL_USER }}|g" k8s/02-configmap.yaml
           sed -i "s|REPLACE_DB_PASSWORD|${{ steps.tf_output.outputs.MYSQL_PASSWORD }}|g" k8s/02-configmap.yaml
-          kubectl create namespace banking-app --dry-run=client -o yaml | kubectl apply -f -
+          kubectl apply -f k8s/01-namespace.yaml
           kubectl apply -f k8s/02-configmap.yaml
