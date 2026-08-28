@@ -17,8 +17,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: banking.example.com   # Replace with your domain or LB IP
-      http:
+    - http:
         paths:
           - path: /()(.*)
             pathType: ImplementationSpecific
