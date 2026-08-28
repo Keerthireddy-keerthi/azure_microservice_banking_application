@@ -8,7 +8,7 @@ metadata:
   name: mysql-config
   namespace: banking-app
 data:
-  DB_HOST: "REPLACE_MYSQL_HOST"
-  DB_USER: "REPLACE_DB_USER"
-  DB_PASSWORD: "REPLACE_DB_PASSWORD"
+  DB_HOST: "bankingapp-mysql.mysql.database.azure.com"
+  DB_USER: "bankadmin"
+  DB_PASSWORD: "Veera@2024#Cloud"
   DB_PORT: "3306"
