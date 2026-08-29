@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>404 — Service Unavailable | Veera_NareshIT_Bank</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+Telugu:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+Telugu:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -174,57 +174,36 @@
     .bubble .who { display: block; font-size: .68rem; letter-spacing: 1.8px; text-transform: uppercase; color: #7a8fa6; margin-bottom: 7px; }
     .bubble .line { display: block; animation: bubblePop .45s ease both; }
 
-    /* ═══════════ Tri-lingual batch call-out ═══════════ */
-    @keyframes cardIn   { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
-    @keyframes glowVar  { 0%,100% { box-shadow: 0 0 0 -8px var(--c1); } 50% { box-shadow: 0 0 24px -6px var(--c1); } }
-    @keyframes emojiPop { 0%,100% { transform: scale(1) rotate(0); } 50% { transform: scale(1.26) rotate(-8deg); } }
-    @keyframes sweepBar { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+    /* ═══════════ Telugu batch call-out ═══════════ */
+    @keyframes lineIn   { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes glowEdge { 0%,100% { box-shadow: 0 0 0 rgba(79,172,254,0); border-color: rgba(79,172,254,0.3); } 50% { box-shadow: 0 0 26px rgba(79,172,254,0.22); border-color: rgba(0,242,254,0.55); } }
+    @keyframes emojiPop { 0%,100% { transform: scale(1) rotate(0); } 50% { transform: scale(1.28) rotate(-8deg); } }
 
-    .lang-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(196px, 1fr));
-      gap: 11px; margin-top: 20px; text-align: left;
+    .telugu-note {
+      position: relative; overflow: hidden; margin-top: 22px; padding: 22px 20px;
+      border-radius: 18px; border: 1px solid rgba(79,172,254,0.3);
+      background-image: linear-gradient(135deg, rgba(52,211,153,0.09), rgba(79,172,254,0.1) 55%, rgba(167,139,250,0.09));
+      animation: glowEdge 3.2s ease-in-out infinite;
+      font-family: 'Noto Sans Telugu', 'Inter', sans-serif;
     }
-    .lang-card {
-      position: relative; overflow: hidden; padding: 13px 13px 12px;
-      border-radius: 14px; border: 1px solid rgba(255,255,255,0.1);
-      background-image: linear-gradient(160deg, rgba(255,255,255,0.055), rgba(255,255,255,0.015));
-      animation: cardIn .55s ease both, glowVar 3.6s ease-in-out infinite;
+    .telugu-note::before {
+      content: ''; position: absolute; inset: 0;
+      background-image: linear-gradient(110deg, transparent 32%, rgba(255,255,255,0.09) 50%, transparent 68%);
+      background-size: 300% 100%; animation: shimmer 4.2s linear infinite;
     }
-    /* Per-language palette drives the accent bar, badge, glow and bold text */
-    .lang-card.te { --c1: #34d399; --c2: #00f2fe; font-family: 'Noto Sans Telugu', 'Inter', sans-serif; }
-    .lang-card.hi { --c1: #fbbf24; --c2: #fb7185; font-family: 'Noto Sans Devanagari', 'Inter', sans-serif; }
-    .lang-card.en { --c1: #4facfe; --c2: #a78bfa; font-family: 'Inter', sans-serif; }
-    .lang-card:nth-child(1) { animation-delay: .1s, .1s; }
-    .lang-card:nth-child(2) { animation-delay: .25s, .9s; }
-    .lang-card:nth-child(3) { animation-delay: .4s, 1.7s; }
-
-    /* top accent bar with a light sweeping across it */
-    .lang-card::before {
-      content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px;
-      background-image: linear-gradient(90deg, var(--c1), var(--c2));
+    .telugu-note p {
+      position: relative; margin: 0; font-weight: 700; color: #f1f6fb;
+      font-size: clamp(1rem, 3.3vw, 1.24rem); line-height: 1.95;
+      animation: lineIn .6s ease both;
     }
-    .lang-card::after {
-      content: ''; position: absolute; left: 0; top: 0; width: 40%; height: 3px;
-      background-image: linear-gradient(90deg, transparent, rgba(255,255,255,0.85), transparent);
-      animation: sweepBar 2.8s linear infinite;
-    }
-    .lang-card .badge {
-      display: inline-block; margin-bottom: 8px; padding: 3px 9px; border-radius: 999px;
-      font-family: 'Inter', sans-serif; font-size: .6rem; font-weight: 800;
-      letter-spacing: 1.1px; text-transform: uppercase; color: #06121f;
-      background-image: linear-gradient(135deg, var(--c1), var(--c2));
-    }
-    .lang-card p { margin: 0; font-size: .82rem; line-height: 1.72; color: #dce6f0; font-weight: 500; }
-    .lang-card b {
-      font-weight: 700;
-      background-image: linear-gradient(135deg, var(--c1), var(--c2));
+    .telugu-note p:nth-child(1) { animation-delay: .15s; }
+    .telugu-note p:nth-child(2) { animation-delay: .35s; }
+    .telugu-note p:nth-child(3) { animation-delay: .55s; }
+    .telugu-note .em { display: inline-block; animation: emojiPop 2.4s ease-in-out infinite; }
+    .telugu-note .hl {
+      background-image: linear-gradient(135deg, #34d399, #4facfe);
       -webkit-background-clip: text; background-clip: text;
-      -webkit-text-fill-color: transparent; color: transparent;
-    }
-    .lang-card .em { display: inline-block; animation: emojiPop 2.4s ease-in-out infinite; }
-
-    @supports not ((-webkit-background-clip: text) or (background-clip: text)) {
-      .lang-card b { background-image: none; color: var(--c1); -webkit-text-fill-color: var(--c1); }
+      -webkit-text-fill-color: transparent; color: transparent; font-weight: 700;
     }
 
     /* ═══════════ Terminal ═══════════ */
@@ -343,26 +322,11 @@
       </div>
     </section>
 
-    <!-- Batch call-out in three languages, right under the reaction shot -->
-    <section class="lang-grid" aria-label="New batch announcement">
-      <div class="lang-card te" lang="te">
-        <span class="badge">తెలుగు</span>
-        <p>Error చూసి భయపడకు… <span class="em">😎</span></p>
-        <p><b>Monday నుంచి New Batch Start అవుతుంది!</b> <span class="em">🚀</span></p>
-        <p>Join అయిపో… Errors ని కలిసి Debug చేద్దాం! <span class="em">😂🔥</span></p>
-      </div>
-      <div class="lang-card hi" lang="hi">
-        <span class="badge">हिन्दी</span>
-        <p>Error देखकर डरो मत… <span class="em">😎</span></p>
-        <p><b>Monday से New Batch शुरू हो रहा है!</b> <span class="em">🚀</span></p>
-        <p>Join कर लो… Errors को मिलकर Debug करेंगे! <span class="em">😂🔥</span></p>
-      </div>
-      <div class="lang-card en" lang="en">
-        <span class="badge">English</span>
-        <p>Don't be scared of the error… <span class="em">😎</span></p>
-        <p><b>New Batch starts this Monday!</b> <span class="em">🚀</span></p>
-        <p>Just join in… let's debug the errors together! <span class="em">😂🔥</span></p>
-      </div>
+    <!-- Batch call-out, right under the reaction shot -->
+    <section class="telugu-note" lang="te">
+      <p>Error చూసి భయపడకు… <span class="em">😎</span></p>
+      <p><span class="hl">Monday నుంచి New Batch Start అవుతుంది!</span> <span class="em">🚀</span></p>
+      <p>Join అయిపో… Errors ని కలిసి Debug చేద్దాం! <span class="em">😂🔥</span></p>
     </section>
 
     <!-- Live "kubectl" transcript, typed out -->
