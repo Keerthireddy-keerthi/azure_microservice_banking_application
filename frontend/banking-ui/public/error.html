@@ -78,10 +78,10 @@
     }
 
     /* ═══════════ Orbiting multi-cloud ring around the 404 ═══════════ */
-    .hero { position: relative; display: flex; align-items: center; justify-content: center; height: 260px; }
+    .hero { position: relative; display: flex; align-items: center; justify-content: center; height: 196px; }
 
-    .ring { position: absolute; width: 300px; height: 300px; animation: orbit 18s linear infinite; }
-    .ring.slow { width: 400px; height: 400px; animation: orbit 30s linear infinite reverse; }
+    .ring { position: absolute; width: 208px; height: 208px; animation: orbit 18s linear infinite; }
+    .ring.slow { width: 292px; height: 292px; animation: orbit 30s linear infinite reverse; }
     .ring::before {
       content: ''; position: absolute; inset: 0; border-radius: 50%;
       border: 1px dashed rgba(79,172,254,0.16);
@@ -99,7 +99,7 @@
     /* ═══════════ 404 ═══════════ */
     .code-404 {
       position: relative; z-index: 2; font-weight: 900; line-height: 1;
-      font-size: clamp(5rem, 17vw, 8.5rem); letter-spacing: -5px;
+      font-size: clamp(2.8rem, 9vw, 4.6rem); letter-spacing: -2px;
       animation: jitter 4.5s steps(3, end) infinite;
     }
     .code-404 .layer { display: block; }
@@ -128,9 +128,9 @@
       content: ''; position: absolute; inset: 2px; border-radius: 50%;
       border: 2px solid rgba(79,172,254,0.5); animation: pulseRing 2.2s ease-out infinite;
     }
-    .goodbye { font-size: clamp(1.6rem, 5vw, 2.35rem); font-weight: 800; color: #fff; margin-top: 4px; }
+    .goodbye { font-size: clamp(1.3rem, 4.4vw, 2rem); font-weight: 800; color: #fff; margin-top: 4px; }
     .goodbye span { display: inline-block; animation: letterDrop .5s ease both; }
-    .goodbye .sp { width: .4em; }
+    .goodbye .sp { width: .32em; }
 
     .sub { color: #7a8fa6; font-size: .96rem; line-height: 1.65; max-width: 500px; margin: 12px auto 0; }
 
@@ -270,9 +270,9 @@
     .foot { margin-top: 22px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.06); font-size: .75rem; color: #5f7489; font-family: 'JetBrains Mono', monospace; }
 
     @media (max-width: 560px) {
-      .hero { height: 210px; }
-      .ring { width: 230px; height: 230px; } .ring.slow { width: 300px; height: 300px; }
-      .sat { width: 38px; height: 38px; margin: -19px 0 0 -19px; font-size: 1rem; }
+      .hero { height: 168px; }
+      .ring { width: 168px; height: 168px; } .ring.slow { width: 232px; height: 232px; }
+      .sat { width: 34px; height: 34px; margin: -17px 0 0 -17px; font-size: .9rem; }
     }
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
   </style>
@@ -294,7 +294,7 @@
     </div>
 
     <div class="hand-zone"><span class="hand" aria-hidden="true">👋</span></div>
-    <p class="goodbye" id="goodbye" aria-label="Good bye"></p>
+    <p class="goodbye" id="goodbye" aria-label="Pod ekkada ra babu?"></p>
 
     <p class="sub">
       This microservice has left the cluster — zero ready pods, so nginx has
@@ -318,7 +318,7 @@
       </div>
       <div class="bubble">
         <span class="who">Live reaction</span>
-        <span class="line" id="funnyLine">Pod ekkada ra babu? 😐</span>
+        <span class="line" id="funnyLine">Replicas: 0. My hopes: also 0. 😐</span>
       </div>
     </section>
 
@@ -405,13 +405,15 @@
       place('ringOuter', outer);
     })();
 
-    /* ---------- "Good bye" letter drop ---------- */
+    /* ---------- Headline letter drop ---------- */
     (function () {
       var host = document.getElementById('goodbye');
-      'Good bye'.split('').forEach(function (ch, i) {
+      // Array.from splits by code point, so the emoji survives intact
+      // (plain split('') would tear its surrogate pair in half).
+      Array.from('Pod ekkada ra babu? 😐').forEach(function (ch, i) {
         var s = document.createElement('span');
         if (ch === ' ') { s.className = 'sp'; } else { s.textContent = ch; }
-        s.style.animationDelay = (0.3 + i * 0.06) + 's';
+        s.style.animationDelay = (0.3 + i * 0.045) + 's';
         host.appendChild(s);
       });
     })();
@@ -459,10 +461,9 @@
     (function () {
       var el = document.getElementById('funnyLine');
       var lines = [
-        'Pod ekkada ra babu? 😐',
+        'Replicas: 0. My hopes: also 0. 😐',
         '"kubectl get pods" ani kottanu... adi "get lost" ani chepindi!',
         'I came here for ' + META.service.replace('-ui', '') + '. I got comedy. 🎭',
-        'Replicas: 0. My hopes: also 0.',
         'Ingress said ' + META.code + '. Naa heart ki 100 ayindi. 💔',
         'Developer: "works on my laptop". Cluster: "chala thanks!"',
         'Pod ni restart cheyyandi... nannu kaadu! 🥲',
