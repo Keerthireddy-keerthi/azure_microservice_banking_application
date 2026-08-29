@@ -4,134 +4,238 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>404 — Service Unavailable | Veera_NareshIT_Bank</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #0f1624 0%, #1a2744 50%, #0d2137 100%);
+      background: #0b1220;
       min-height: 100vh; color: #e0e6ed;
       display: flex; align-items: center; justify-content: center;
-      padding: 40px 20px; overflow-x: hidden;
+      padding: 40px 18px; overflow-x: hidden;
     }
 
-    /* ---------- Animations ---------- */
-    @keyframes fadeInUp   { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes floatOrb   { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(30px,-40px) scale(1.15); } }
-    @keyframes wave       { 0%,60%,100% { transform: rotate(0deg); } 10%,30%,50% { transform: rotate(16deg); } 20%,40% { transform: rotate(-10deg); } }
-    @keyframes glitchTop  { 0%,100% { clip-path: inset(0 0 62% 0); transform: translate(0,0); } 20% { transform: translate(-4px,-3px); } 40% { transform: translate(4px,2px); } 60% { transform: translate(-2px,1px); } }
-    @keyframes glitchBot  { 0%,100% { clip-path: inset(45% 0 0 0); transform: translate(0,0); } 25% { transform: translate(4px,3px); } 45% { transform: translate(-5px,-2px); } 65% { transform: translate(2px,-1px); } }
-    @keyframes pulseRing  { 0% { transform: scale(0.85); opacity: 0.55; } 100% { transform: scale(1.9); opacity: 0; } }
-    @keyframes shimmer    { 0% { background-position: -300% 0; } 100% { background-position: 300% 0; } }
-    @keyframes blink      { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
-    @keyframes letterDrop { from { opacity: 0; transform: translateY(-24px) rotate(-12deg); } to { opacity: 1; transform: translateY(0) rotate(0); } }
-    @keyframes plugOut    { 0%,100% { transform: translateX(0); } 50% { transform: translateX(-14px); } }
+    /* ═══════════ Gradient-text helper ═══════════
+       IMPORTANT: always use background-image (never the `background`
+       shorthand) on these, because the shorthand resets background-clip
+       back to border-box and the gradient then paints the whole box as a
+       solid coloured bar instead of filling the glyphs. */
+    .gtext {
+      background-image: linear-gradient(135deg, #4facfe, #00f2fe 50%, #a78bfa);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; color: transparent;
+    }
 
-    /* ---------- Background orbs ---------- */
-    .orb { position: fixed; border-radius: 50%; filter: blur(70px); opacity: 0.28; pointer-events: none; z-index: 0; }
-    .orb.a { width: 420px; height: 420px; background: #4facfe; top: -120px; left: -100px; animation: floatOrb 14s ease-in-out infinite; }
-    .orb.b { width: 360px; height: 360px; background: #ef4444; bottom: -110px; right: -90px; animation: floatOrb 18s ease-in-out infinite reverse; }
-    .orb.c { width: 300px; height: 300px; background: #00f2fe; bottom: 20%; left: 8%; animation: floatOrb 22s ease-in-out infinite; }
+    /* ═══════════ Animations ═══════════ */
+    @keyframes fadeInUp    { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes floatOrb    { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(34px,-44px) scale(1.18); } }
+    @keyframes gridDrift   { from { background-position: 0 0, 0 0; } to { background-position: 60px 60px, 60px 60px; } }
+    @keyframes wave        { 0%,60%,100% { transform: rotate(0deg); } 10%,30%,50% { transform: rotate(18deg); } 20%,40% { transform: rotate(-12deg); } }
+    @keyframes jitter      { 0%,100% { transform: translate(0,0); } 20% { transform: translate(-2px,1px); } 40% { transform: translate(2px,-1px); } 60% { transform: translate(-1px,-2px); } 80% { transform: translate(1px,2px); } }
+    @keyframes sliceTop    { 0%,100% { clip-path: inset(2% 0 66% 0); transform: translate(0,0); opacity: .85; } 35% { clip-path: inset(10% 0 58% 0); transform: translate(-5px,-2px); opacity: .5; } 70% { clip-path: inset(0 0 72% 0); transform: translate(4px,2px); opacity: .9; } }
+    @keyframes sliceBot    { 0%,100% { clip-path: inset(58% 0 4% 0); transform: translate(0,0); opacity: .85; } 30% { clip-path: inset(50% 0 12% 0); transform: translate(5px,2px); opacity: .55; } 65% { clip-path: inset(66% 0 0 0); transform: translate(-4px,-2px); opacity: .9; } }
+    @keyframes scan        { 0% { transform: translateY(-120%); } 100% { transform: translateY(520%); } }
+    @keyframes orbit       { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes orbitFix    { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+    @keyframes pulseRing   { 0% { transform: scale(0.9); opacity: .5; } 100% { transform: scale(1.85); opacity: 0; } }
+    @keyframes shimmer     { 0% { background-position: -300% 0; } 100% { background-position: 300% 0; } }
+    @keyframes blink       { 0%,100% { opacity: 1; } 50% { opacity: .2; } }
+    @keyframes letterDrop  { from { opacity: 0; transform: translateY(-26px) rotate(-14deg); } to { opacity: 1; transform: translateY(0) rotate(0); } }
+    @keyframes unplug      { 0%,100% { transform: translateX(0) rotate(0); } 50% { transform: translateX(-13px) rotate(-16deg); } }
+    @keyframes marquee     { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    @keyframes caret       { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }
+    @keyframes hueShift    { from { filter: hue-rotate(0deg); } to { filter: hue-rotate(360deg); } }
 
-    /* ---------- Card ---------- */
+    /* ═══════════ Background ═══════════ */
+    .bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .bg::before {
+      content: ''; position: absolute; inset: -50%;
+      background-image:
+        linear-gradient(rgba(79,172,254,0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(79,172,254,0.07) 1px, transparent 1px);
+      background-size: 60px 60px, 60px 60px;
+      animation: gridDrift 7s linear infinite;
+    }
+    .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: .3; }
+    .orb.a { width: 440px; height: 440px; background: #4facfe; top: -130px; left: -110px; animation: floatOrb 15s ease-in-out infinite; }
+    .orb.b { width: 380px; height: 380px; background: #ef4444; bottom: -120px; right: -100px; animation: floatOrb 19s ease-in-out infinite reverse; }
+    .orb.c { width: 320px; height: 320px; background: #a78bfa; bottom: 18%; left: 6%; animation: floatOrb 23s ease-in-out infinite; }
+
+    /* ═══════════ Card ═══════════ */
     .wrap {
-      position: relative; z-index: 1; width: 100%; max-width: 680px; text-align: center;
-      background: rgba(15,22,36,0.72); backdrop-filter: blur(22px);
-      border: 1px solid rgba(255,255,255,0.08); border-radius: 26px;
-      padding: 52px 40px 44px; box-shadow: 0 26px 70px rgba(0,0,0,0.5);
-      animation: fadeInUp 0.65s ease both;
+      position: relative; z-index: 1; width: 100%; max-width: 760px; text-align: center;
+      background: rgba(12,19,33,0.78); backdrop-filter: blur(22px);
+      border: 1px solid rgba(255,255,255,0.08); border-radius: 28px;
+      padding: 46px 38px 40px; box-shadow: 0 28px 80px rgba(0,0,0,0.55);
+      animation: fadeInUp .65s ease both; overflow: hidden;
+    }
+    /* scanline sweeping down the card */
+    .wrap::after {
+      content: ''; position: absolute; left: 0; right: 0; top: 0; height: 90px; pointer-events: none;
+      background: linear-gradient(180deg, transparent, rgba(79,172,254,0.09), transparent);
+      animation: scan 5.5s linear infinite;
     }
 
-    /* ---------- Waving hand ---------- */
-    .hand-zone { position: relative; display: inline-block; margin-bottom: 10px; }
-    .hand { font-size: 4.4rem; display: inline-block; transform-origin: 72% 78%; animation: wave 2.6s ease-in-out infinite; }
+    /* ═══════════ Orbiting multi-cloud ring around the 404 ═══════════ */
+    .hero { position: relative; display: flex; align-items: center; justify-content: center; height: 260px; }
+
+    .ring { position: absolute; width: 300px; height: 300px; animation: orbit 18s linear infinite; }
+    .ring.slow { width: 400px; height: 400px; animation: orbit 30s linear infinite reverse; }
+    .ring::before {
+      content: ''; position: absolute; inset: 0; border-radius: 50%;
+      border: 1px dashed rgba(79,172,254,0.16);
+    }
+    .sat {
+      position: absolute; width: 46px; height: 46px; margin: -23px 0 0 -23px;
+      border-radius: 14px; display: grid; place-items: center; font-size: 1.25rem;
+      background: rgba(15,24,42,0.92); border: 1px solid rgba(79,172,254,0.3);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+      animation: orbitFix 18s linear infinite;
+    }
+    .ring.slow .sat { animation: orbitFix 30s linear infinite reverse; }
+    .sat b { font-size: 0.5rem; font-weight: 700; letter-spacing: .4px; }
+
+    /* ═══════════ 404 ═══════════ */
+    .code-404 {
+      position: relative; z-index: 2; font-weight: 900; line-height: 1;
+      font-size: clamp(5rem, 17vw, 8.5rem); letter-spacing: -5px;
+      animation: jitter 4.5s steps(3, end) infinite;
+    }
+    .code-404 .layer { display: block; }
+    .code-404 .g { position: absolute; inset: 0; }
+    /* background-image (not the shorthand) so background-clip:text survives */
+    .code-404 .g1 {
+      background-image: linear-gradient(135deg, #ef4444, #fb7185);
+      animation: sliceTop 3.4s steps(2, end) infinite;
+    }
+    .code-404 .g2 {
+      background-image: linear-gradient(135deg, #00f2fe, #4facfe);
+      animation: sliceBot 4.1s steps(2, end) infinite;
+    }
+
+    /* If background-clip:text is unsupported, gradients would render as solid
+       blocks - fall back to flat colour and drop the glitch layers entirely. */
+    @supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+      .gtext { background-image: none; color: #4facfe; -webkit-text-fill-color: #4facfe; }
+      .code-404 .g { display: none; }
+    }
+
+    /* ═══════════ Hand + goodbye ═══════════ */
+    .hand-zone { position: relative; display: inline-block; }
+    .hand { font-size: 3rem; display: inline-block; transform-origin: 72% 78%; animation: wave 2.6s ease-in-out infinite; }
     .hand-zone::after {
-      content: ''; position: absolute; inset: 6px; border-radius: 50%;
+      content: ''; position: absolute; inset: 2px; border-radius: 50%;
       border: 2px solid rgba(79,172,254,0.5); animation: pulseRing 2.2s ease-out infinite;
     }
+    .goodbye { font-size: clamp(1.6rem, 5vw, 2.35rem); font-weight: 800; color: #fff; margin-top: 4px; }
+    .goodbye span { display: inline-block; animation: letterDrop .5s ease both; }
+    .goodbye .sp { width: .4em; }
 
-    /* ---------- 404 glitch ---------- */
-    .code-404 { position: relative; font-size: clamp(5rem, 18vw, 9rem); font-weight: 800; line-height: 1; letter-spacing: -4px; margin: 6px 0 4px; }
-    .code-404 .base {
-      background: linear-gradient(135deg, #4facfe, #00f2fe 45%, #ef4444);
-      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .code-404 .g { position: absolute; inset: 0; -webkit-text-fill-color: transparent; background-clip: text; -webkit-background-clip: text; }
-    .code-404 .g1 { background: linear-gradient(135deg, #ef4444, #f87171); animation: glitchTop 2.6s steps(2, end) infinite; }
-    .code-404 .g2 { background: linear-gradient(135deg, #00f2fe, #4facfe); animation: glitchBot 3.1s steps(2, end) infinite; }
+    .sub { color: #7a8fa6; font-size: .96rem; line-height: 1.65; max-width: 500px; margin: 12px auto 0; }
 
-    /* ---------- Good bye ---------- */
-    .goodbye { font-size: clamp(1.7rem, 5vw, 2.5rem); font-weight: 700; color: #fff; margin-bottom: 6px; }
-    .goodbye span { display: inline-block; animation: letterDrop 0.5s ease both; }
-    .goodbye .sp { width: 0.42em; }
-
-    .sub { color: #7a8fa6; font-size: 0.98rem; line-height: 1.65; max-width: 470px; margin: 12px auto 0; }
-
-    /* ---------- Down service chip ---------- */
+    /* ═══════════ Down-service chip ═══════════ */
     .chip {
-      display: inline-flex; align-items: center; gap: 9px; margin-top: 22px;
-      padding: 9px 18px; border-radius: 999px; font-size: 0.86rem; font-weight: 600;
-      background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.28); color: #fca5a5;
+      display: inline-flex; align-items: center; gap: 9px; margin-top: 20px;
+      padding: 9px 18px; border-radius: 999px; font-size: .86rem; font-weight: 600;
+      background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5;
     }
-    .chip .dot { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; animation: blink 1.2s ease-in-out infinite; }
-    .chip .plug { display: inline-block; animation: plugOut 2.4s ease-in-out infinite; }
+    .chip .dot { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; animation: blink 1.1s ease-in-out infinite; }
+    .chip .plug { display: inline-block; animation: unplug 2.4s ease-in-out infinite; }
 
-    /* ---------- CTA banner ---------- */
+    /* ═══════════ Terminal ═══════════ */
+    .term {
+      margin-top: 26px; text-align: left; border-radius: 14px; overflow: hidden;
+      background: #070c16; border: 1px solid rgba(255,255,255,0.09);
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+    }
+    .term-bar { display: flex; align-items: center; gap: 7px; padding: 10px 14px; background: rgba(255,255,255,0.04); }
+    .term-bar i { width: 11px; height: 11px; border-radius: 50%; display: block; }
+    .term-bar .r { background: #ff5f57; } .term-bar .y { background: #febc2e; } .term-bar .g { background: #28c840; }
+    .term-bar span { margin-left: 8px; font-size: .72rem; color: #64748b; }
+    .term-body { padding: 14px 16px 16px; font-size: .8rem; line-height: 1.85; min-height: 128px; }
+    .term-body .ln { white-space: pre-wrap; word-break: break-word; }
+    .term-body .p  { color: #4facfe; }
+    .term-body .ok { color: #34d399; }
+    .term-body .er { color: #f87171; }
+    .term-body .dim { color: #64748b; }
+    .caret { display: inline-block; width: 8px; background: #4facfe; animation: caret 1s step-end infinite; }
+
+    /* ═══════════ Tech marquee ═══════════ */
+    .marquee { margin-top: 24px; overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+    .track { display: flex; width: max-content; animation: marquee 22s linear infinite; }
+    .track .grp { display: flex; gap: 10px; padding-right: 10px; }
+    .tag {
+      display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+      padding: 7px 14px; border-radius: 999px; font-size: .76rem; font-weight: 600; color: #a9bcd0;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    /* ═══════════ CTA ═══════════ */
     .cta {
-      position: relative; overflow: hidden; margin-top: 32px; padding: 26px 24px;
-      border-radius: 18px; border: 1px solid rgba(79,172,254,0.28);
-      background: linear-gradient(135deg, rgba(79,172,254,0.12), rgba(0,242,254,0.05));
+      position: relative; overflow: hidden; margin-top: 26px; padding: 26px 22px;
+      border-radius: 18px; border: 1px solid rgba(79,172,254,0.3);
+      background-image: linear-gradient(135deg, rgba(79,172,254,0.13), rgba(167,139,250,0.07));
     }
     .cta::before {
       content: ''; position: absolute; inset: 0;
-      background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.09) 50%, transparent 70%);
+      background-image: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
       background-size: 300% 100%; animation: shimmer 3.4s linear infinite;
     }
-    .cta h3 { position: relative; font-size: 1.16rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
-    .cta p  { position: relative; font-size: 0.92rem; color: #a9bcd0; line-height: 1.6; }
-    .cta .accent { color: #4facfe; font-weight: 600; }
+    .cta .kicker { position: relative; font-size: .72rem; letter-spacing: 2.4px; text-transform: uppercase; color: #7a8fa6; }
+    .cta h2 { position: relative; font-size: clamp(1.25rem, 4vw, 1.7rem); font-weight: 900; margin: 6px 0 8px; animation: hueShift 9s linear infinite; }
+    .cta p { position: relative; font-size: .92rem; color: #a9bcd0; line-height: 1.65; }
+    .cta .accent { color: #4facfe; font-weight: 700; }
 
-    /* ---------- Buttons ---------- */
-    .actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 28px; }
+    /* ═══════════ Buttons ═══════════ */
+    .actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 24px; }
     .btn {
-      padding: 13px 26px; border-radius: 12px; font-size: 0.9rem; font-weight: 600;
+      padding: 13px 26px; border-radius: 12px; font-size: .9rem; font-weight: 700; border: none;
       cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
-      transition: transform 0.25s, box-shadow 0.25s, background 0.25s; border: none;
+      transition: transform .25s, box-shadow .25s, background .25s;
     }
-    .btn.primary { background: linear-gradient(135deg, #4facfe, #00f2fe); color: #0a1628; }
-    .btn.primary:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(79,172,254,0.32); }
-    .btn.ghost { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); color: #e0e6ed; }
+    .btn.primary { background-image: linear-gradient(135deg, #4facfe, #00f2fe); color: #06121f; }
+    .btn.primary:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(79,172,254,0.35); }
+    .btn.ghost { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.13); color: #e0e6ed; }
     .btn.ghost:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
 
-    .retry-note { margin-top: 18px; font-size: 0.8rem; color: #5f7489; }
+    .bar { margin: 20px auto 0; width: 210px; height: 4px; border-radius: 4px; background: rgba(255,255,255,0.08); overflow: hidden; }
+    .bar i { display: block; height: 100%; width: 100%; background-image: linear-gradient(90deg, #4facfe, #00f2fe); transition: width 1s linear; }
+    .retry-note { margin-top: 9px; font-size: .78rem; color: #5f7489; }
     .retry-note b { color: #4facfe; }
 
-    .foot { margin-top: 26px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.78rem; color: #5f7489; }
+    .foot { margin-top: 22px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.06); font-size: .75rem; color: #5f7489; font-family: 'JetBrains Mono', monospace; }
 
-    @media (prefers-reduced-motion: reduce) {
-      * { animation: none !important; }
+    @media (max-width: 560px) {
+      .hero { height: 210px; }
+      .ring { width: 230px; height: 230px; } .ring.slow { width: 300px; height: 300px; }
+      .sat { width: 38px; height: 38px; margin: -19px 0 0 -19px; font-size: 1rem; }
     }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
   </style>
 </head>
 <body>
-  <div class="orb a"></div><div class="orb b"></div><div class="orb c"></div>
+  <div class="bg"><span class="orb a"></span><span class="orb b"></span><span class="orb c"></span></div>
 
   <main class="wrap" role="main">
-    <div class="hand-zone"><span class="hand" aria-hidden="true">👋</span></div>
 
-    <div class="code-404" aria-hidden="true">
-      <span class="base">404</span>
-      <span class="g g1">404</span>
-      <span class="g g2">404</span>
+    <!-- 404 with orbiting multi-cloud satellites -->
+    <div class="hero">
+      <div class="ring" id="ringInner" aria-hidden="true"></div>
+      <div class="ring slow" id="ringOuter" aria-hidden="true"></div>
+      <h1 class="code-404" aria-label="404 service unavailable">
+        <span class="layer gtext">404</span>
+        <span class="layer g g1 gtext" aria-hidden="true">404</span>
+        <span class="layer g g2 gtext" aria-hidden="true">404</span>
+      </h1>
     </div>
 
-    <h1 class="goodbye" id="goodbye" aria-label="Good bye"></h1>
+    <div class="hand-zone"><span class="hand" aria-hidden="true">👋</span></div>
+    <p class="goodbye" id="goodbye" aria-label="Good bye"></p>
 
     <p class="sub">
-      This service has left the cluster. Its pods are gone, so nginx has nowhere
-      to send your request — and we did not want to leave you staring at a raw
-      gateway error.
+      This microservice has left the cluster — zero ready pods, so nginx has
+      nowhere to forward your request. No raw gateway error for you though.
     </p>
 
     <div class="chip">
@@ -140,13 +244,25 @@
       <span>Service down:&nbsp;<b><!--# echo var="http_x_service_name" default="unknown-service" --></b></span>
     </div>
 
+    <!-- Live "kubectl" transcript, typed out -->
+    <section class="term" aria-hidden="true">
+      <div class="term-bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>veera@multicloud:~/banking-app</span></div>
+      <div class="term-body" id="term"></div>
+    </section>
+
+    <!-- Multi-cloud / DevOps toolchain marquee -->
+    <div class="marquee" aria-hidden="true">
+      <div class="track" id="track"></div>
+    </div>
+
     <section class="cta">
-      <h3>🚀 Want the fix for this?</h3>
+      <div class="kicker">Root cause → self-healing pods</div>
+      <h2 class="gtext">Multi-Cloud DevOps</h2>
       <p>
-        Self-healing deployments, readiness probes, PodDisruptionBudgets and
-        zero-downtime rollouts are exactly what we build hands-on in the
-        <span class="accent">Multi-Cloud DevOps batch</span> with
-        <span class="accent">Veera Sir @ NareshIT</span>.
+        Readiness probes, PodDisruptionBudgets, HPA and zero-downtime rollouts —
+        the exact fixes for this screen — are what we build hands-on with
+        <span class="accent">Veera Sir @ NareshIT</span> across
+        <span class="accent">Azure, AWS and GCP</span>.
         <br />Please join our Multi-Cloud batch for the solution!
       </p>
     </section>
@@ -156,35 +272,127 @@
       <button class="btn ghost" type="button" onclick="location.reload()">🔄 Retry now</button>
     </div>
 
-    <p class="retry-note">Retrying automatically in <b id="count">20</b>s…</p>
+    <div class="bar"><i id="barFill"></i></div>
+    <p class="retry-note">Auto-retrying in <b id="count">20</b>s…</p>
 
     <p class="foot">
-      Veera_NareshIT_Bank · error <!--# echo var="http_x_code" default="503" -->
-      on <!--# echo var="http_x_original_uri" default="/" -->
+      status <!--# echo var="http_x_code" default="503" --> ·
+      path <!--# echo var="http_x_original_uri" default="/" --> ·
+      Veera_NareshIT_Bank on AKS
     </p>
   </main>
 
   <script>
-    // Letter-by-letter drop-in for the goodbye headline.
+    /* Values injected by nginx SSI from the headers the ingress sends.
+       Kept in one place so no SSI directive has to live inside JS strings. */
+    var META = {
+      service: '<!--# echo var="http_x_service_name" default="service" -->',
+      code:    '<!--# echo var="http_x_code" default="503" -->'
+    };
+  </script>
+  <script>
+    /* ---------- Orbiting cloud / tool satellites ---------- */
     (function () {
-      var text = 'Good bye 👋';
+      var inner = [
+        { i: '☁️', t: 'AZURE' }, { i: '🟧', t: 'AWS' },
+        { i: '🔵', t: 'GCP' },  { i: '⎈',  t: 'K8S' }
+      ];
+      var outer = [
+        { i: '🐳', t: 'DOCKER' }, { i: '🏗️', t: 'TERRAFORM' },
+        { i: '🔁', t: 'ACTIONS' }, { i: '📊', t: 'GRAFANA' },
+        { i: '⛵', t: 'HELM' },    { i: '🐙', t: 'ARGOCD' }
+      ];
+      function place(ringId, items) {
+        var ring = document.getElementById(ringId);
+        var r = ring.offsetWidth / 2;
+        items.forEach(function (o, n) {
+          var a = (n / items.length) * Math.PI * 2;
+          var el = document.createElement('div');
+          el.className = 'sat';
+          el.innerHTML = '<span>' + o.i + '</span>';
+          el.style.left = (r + r * Math.cos(a)) + 'px';
+          el.style.top  = (r + r * Math.sin(a)) + 'px';
+          el.title = o.t;
+          ring.appendChild(el);
+        });
+      }
+      place('ringInner', inner);
+      place('ringOuter', outer);
+    })();
+
+    /* ---------- "Good bye" letter drop ---------- */
+    (function () {
       var host = document.getElementById('goodbye');
-      text.split('').forEach(function (ch, i) {
+      'Good bye'.split('').forEach(function (ch, i) {
         var s = document.createElement('span');
         if (ch === ' ') { s.className = 'sp'; } else { s.textContent = ch; }
-        s.style.animationDelay = (0.35 + i * 0.06) + 's';
+        s.style.animationDelay = (0.3 + i * 0.06) + 's';
         host.appendChild(s);
       });
     })();
 
-    // Auto-retry so the page recovers on its own once the pods are back.
+    /* ---------- Typed kubectl transcript ---------- */
     (function () {
-      var left = 20;
+      var lines = [
+        { c: 'p',   t: '$ kubectl get pods -n banking-app -l app=' + META.service },
+        { c: 'er',  t: 'No resources found. 0/0 pods ready 💀' },
+        { c: 'p',   t: '$ kubectl describe svc ' + META.service },
+        { c: 'er',  t: 'Endpoints:   <none>   → ingress returns ' + META.code },
+        { c: 'p',   t: '$ join multicloud-devops --mentor veera-sir --org nareshit' },
+        { c: 'ok',  t: '✔ Solution unlocked: probes + PDB + HPA + rollouts' },
+        { c: 'dim', t: '# see you in class 👋' }
+      ];
+      var box = document.getElementById('term');
+      var li = 0, ci = 0, cur = null;
+
+      function step() {
+        if (li >= lines.length) return;
+        if (!cur) {
+          cur = document.createElement('div');
+          cur.className = 'ln ' + lines[li].c;
+          box.appendChild(cur);
+          var caret = document.querySelector('.caret');
+          if (caret) caret.remove();
+        }
+        var txt = lines[li].t;
+        if (ci < txt.length) {
+          cur.textContent = txt.slice(0, ++ci);
+          setTimeout(step, txt.charAt(ci - 1) === ' ' ? 12 : 22);
+        } else {
+          var c = document.createElement('span');
+          c.className = 'caret';
+          c.innerHTML = '&nbsp;';
+          cur.appendChild(c);
+          li++; ci = 0; cur = null;
+          setTimeout(step, 420);
+        }
+      }
+      setTimeout(step, 900);
+    })();
+
+    /* ---------- Toolchain marquee (duplicated for a seamless loop) ---------- */
+    (function () {
+      var tools = [
+        '☁️ Azure', '🟧 AWS', '🔵 GCP', '⎈ Kubernetes', '🐳 Docker',
+        '🏗️ Terraform', '🔁 GitHub Actions', '⛵ Helm', '🐙 ArgoCD',
+        '📊 Prometheus', '📈 Grafana', '🔧 Ansible', '🧪 SonarQube', '📦 ACR'
+      ];
+      var html = '<div class="grp">' + tools.map(function (t) {
+        return '<span class="tag">' + t + '</span>';
+      }).join('') + '</div>';
+      document.getElementById('track').innerHTML = html + html;
+    })();
+
+    /* ---------- Auto-retry: the page heals itself once pods are back ---------- */
+    (function () {
+      var total = 20, left = total;
       var el = document.getElementById('count');
+      var fill = document.getElementById('barFill');
       setInterval(function () {
         left -= 1;
         if (left <= 0) { location.reload(); return; }
         el.textContent = left;
+        fill.style.width = (left / total * 100) + '%';
       }, 1000);
     })();
   </script>
