@@ -136,20 +136,15 @@
     .say { display: flex; flex-direction: column; align-items: center; gap: 1px; margin-top: 8px; }
     .goodbye {
       margin: 0; font-size: clamp(1rem, 3.2vw, 1.4rem); font-weight: 800;
-      /* Solid visible fallback: if the gradient text-clip below is not honoured
-         the letters still show in this colour instead of staying invisible. */
+      /* Solid, always-visible colour. The gradient text-clip trick was leaving
+         the glyphs invisible on some browsers (text only appeared when selected),
+         so the lines now use a plain visible colour instead. */
       color: var(--c1, #4facfe);
     }
-    /* Only browsers that support clipping the background to the text switch the
-       letters to transparent so the gradient shows through. */
-    @supports ((-webkit-background-clip: text) or (background-clip: text)) {
-      .goodbye {
-        background-image: linear-gradient(135deg, var(--c1, #4facfe), var(--c2, #00f2fe));
-        -webkit-background-clip: text; background-clip: text;
-      }
-      .goodbye span { color: transparent; -webkit-text-fill-color: transparent; }
+    .goodbye span {
+      display: inline-block; animation: letterDrop .5s ease both;
+      color: var(--c1, #4facfe); -webkit-text-fill-color: currentColor;
     }
-    .goodbye span { display: inline-block; animation: letterDrop .5s ease both; }
     .goodbye .sp { width: .3em; }
     /* colour emoji must keep its own fill, otherwise it renders invisible */
     .goodbye .emo { color: #e0e6ed; -webkit-text-fill-color: initial; }
