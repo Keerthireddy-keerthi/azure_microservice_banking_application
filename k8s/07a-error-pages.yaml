@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
         - name: error-pages
-          image: IMAGE_ERROR_PAGES
+          image: bankingappveeraacr.azurecr.io/error-pages:7a571bc00488b355ddd172caa74bb696c1cdd154
           ports:
             - containerPort: 8090
           resources:

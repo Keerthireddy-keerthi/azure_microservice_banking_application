@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - name: backend-service
-          image: IMAGE_BACKEND_SERVICE
+          image: bankingappveeraacr.azurecr.io/backend-service:7a571bc00488b355ddd172caa74bb696c1cdd154
           ports:
             - containerPort: 8080
           envFrom:
