@@ -62,11 +62,15 @@ jobs:
     name: Deploy to AKS
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.PAT_TOKEN }}
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
 
       - name: Azure Login
         uses: azure/login@v2
@@ -81,11 +85,34 @@ jobs:
 
       - name: Update image tags in K8s manifests
         run: |
-          sed -i "s|IMAGE_BANKING_UI|${{ env.ACR_LOGIN_SERVER }}/banking-ui:${{ env.IMAGE_TAG }}|g" k8s/04-banking-ui.yaml
-          sed -i "s|IMAGE_CARDS_UI|${{ env.ACR_LOGIN_SERVER }}/cards-ui:${{ env.IMAGE_TAG }}|g" k8s/05-cards-ui.yaml
-          sed -i "s|IMAGE_TRANSACTIONS_UI|${{ env.ACR_LOGIN_SERVER }}/transactions-ui:${{ env.IMAGE_TAG }}|g" k8s/06-transactions-ui.yaml
-          sed -i "s|IMAGE_LOANS_UI|${{ env.ACR_LOGIN_SERVER }}/loans-ui:${{ env.IMAGE_TAG }}|g" k8s/07-loans-ui.yaml
-          sed -i "s|IMAGE_BACKEND_SERVICE|${{ env.ACR_LOGIN_SERVER }}/backend-service:${{ env.IMAGE_TAG }}|g" k8s/03-backend-service.yaml
+          set -euo pipefail
+          update_image() {
+            file="$1"; image="$2"
+            # Rewrites the whole "image:" line, so it works whether the file
+            # still holds the IMAGE_* placeholder or a previously committed tag.
+            sed -i -E "s#^([[:space:]]*)image:[[:space:]].*#\1image: ${image}#" "$file"
+          }
+          update_image k8s/03-backend-service.yaml  "${ACR_LOGIN_SERVER}/backend-service:${IMAGE_TAG}"
+          update_image k8s/04-banking-ui.yaml       "${ACR_LOGIN_SERVER}/banking-ui:${IMAGE_TAG}"
+          update_image k8s/05-cards-ui.yaml         "${ACR_LOGIN_SERVER}/cards-ui:${IMAGE_TAG}"
+          update_image k8s/06-transactions-ui.yaml  "${ACR_LOGIN_SERVER}/transactions-ui:${IMAGE_TAG}"
+          update_image k8s/07-loans-ui.yaml         "${ACR_LOGIN_SERVER}/loans-ui:${IMAGE_TAG}"
+          grep -n "image:" k8s/*.yaml
+
+      - name: Commit updated manifests back to repo
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add k8s/03-backend-service.yaml k8s/04-banking-ui.yaml \
+                  k8s/05-cards-ui.yaml k8s/06-transactions-ui.yaml k8s/07-loans-ui.yaml
+          if git diff --cached --quiet; then
+            echo "Manifests already up to date - nothing to commit."
+            exit 0
+          fi
+          git commit -m "ci: update k8s image tags to ${IMAGE_TAG} [skip ci]"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
 
       - name: Deploy to cluster
         run: kubectl apply -f k8s/
