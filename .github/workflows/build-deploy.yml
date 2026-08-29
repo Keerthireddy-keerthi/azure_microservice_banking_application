@@ -47,6 +47,9 @@ jobs:
       - name: Build backend-service
         run: docker build -t ${{ env.ACR_LOGIN_SERVER }}/backend-service:${{ env.IMAGE_TAG }} ./backend
 
+      - name: Build error-pages
+        run: docker build -t ${{ env.ACR_LOGIN_SERVER }}/error-pages:${{ env.IMAGE_TAG }} ./frontend/error-pages
+
       - name: Push all images to ACR
         run: |
           docker push ${{ env.ACR_LOGIN_SERVER }}/banking-ui:${{ env.IMAGE_TAG }}
@@ -54,6 +57,7 @@ jobs:
           docker push ${{ env.ACR_LOGIN_SERVER }}/transactions-ui:${{ env.IMAGE_TAG }}
           docker push ${{ env.ACR_LOGIN_SERVER }}/loans-ui:${{ env.IMAGE_TAG }}
           docker push ${{ env.ACR_LOGIN_SERVER }}/backend-service:${{ env.IMAGE_TAG }}
+          docker push ${{ env.ACR_LOGIN_SERVER }}/error-pages:${{ env.IMAGE_TAG }}
 
   # ─────────────────────────────────────────────────────────────────────────
   # Job 2: Deploy to AKS
@@ -97,6 +101,7 @@ jobs:
           update_image k8s/05-cards-ui.yaml         "${ACR_LOGIN_SERVER}/cards-ui:${IMAGE_TAG}"
           update_image k8s/06-transactions-ui.yaml  "${ACR_LOGIN_SERVER}/transactions-ui:${IMAGE_TAG}"
           update_image k8s/07-loans-ui.yaml         "${ACR_LOGIN_SERVER}/loans-ui:${IMAGE_TAG}"
+          update_image k8s/07a-error-pages.yaml     "${ACR_LOGIN_SERVER}/error-pages:${IMAGE_TAG}"
           grep -n "image:" k8s/*.yaml
 
       - name: Commit updated manifests back to repo
@@ -105,7 +110,8 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add k8s/03-backend-service.yaml k8s/04-banking-ui.yaml \
-                  k8s/05-cards-ui.yaml k8s/06-transactions-ui.yaml k8s/07-loans-ui.yaml
+                  k8s/05-cards-ui.yaml k8s/06-transactions-ui.yaml \
+                  k8s/07-loans-ui.yaml k8s/07a-error-pages.yaml
           if git diff --cached --quiet; then
             echo "Manifests already up to date - nothing to commit."
             exit 0
@@ -119,6 +125,7 @@ jobs:
 
       - name: Verify deployments
         run: |
+          kubectl rollout status deployment/error-pages -n banking-app --timeout=180s
           kubectl rollout status deployment/backend-service -n banking-app --timeout=180s
           kubectl rollout status deployment/banking-ui -n banking-app --timeout=180s
           kubectl rollout status deployment/cards-ui -n banking-app --timeout=180s
