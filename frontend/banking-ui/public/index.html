@@ -767,9 +767,11 @@
       <div class="brand"><h2>🏦 Veera_NareshIT_Bank</h2></div>
       <nav id="sideNav">
         <a data-view="overview" class="active" onclick="switchView('overview')"><span class="nav-icon">🏠</span> Overview</a>
-        <a data-view="transactions" onclick="switchView('transactions')"><span class="nav-icon">📊</span> Transactions</a>
-        <a data-view="cards" onclick="switchView('cards')"><span class="nav-icon">💳</span> Cards</a>
-        <a data-view="loans" onclick="switchView('loans')"><span class="nav-icon">🏦</span> Loans</a>
+        <!-- These three are separate microservices, reached via the ingress.
+             banking-ui only links out to them; it no longer renders them. -->
+        <a href="/transactions"><span class="nav-icon">📊</span> Transactions</a>
+        <a href="/cards"><span class="nav-icon">💳</span> Cards</a>
+        <a href="/loans"><span class="nav-icon">🏦</span> Loans</a>
         <a data-view="beneficiaries" onclick="switchView('beneficiaries')"><span class="nav-icon">👥</span> Beneficiaries</a>
         <a data-view="notifications" onclick="switchView('notifications')"><span class="nav-icon">🔔</span> Notifications</a>
         <a data-view="profile" onclick="switchView('profile')"><span class="nav-icon">👤</span> Profile</a>
@@ -812,8 +814,8 @@
         <div class="page-header">
           <div><h1 id="greeting">Dashboard</h1><p id="greetSub">Welcome back! Here's your financial overview.</p></div>
           <div class="chip-row">
-            <button class="btn-sm" onclick="switchView('transactions')">📄 View statement</button>
-            <button class="btn-sm" onclick="exportCsv()">⬇️ Export CSV</button>
+            <a class="btn-sm" href="/transactions" style="text-decoration:none;">📄 View statement</a>
+            <a class="btn-sm" href="/cards" style="text-decoration:none;">💳 Manage cards</a>
           </div>
         </div>
 
@@ -861,93 +863,14 @@
         </div>
 
         <div class="recent-section">
-          <div class="panel-head"><h3>Recent Transactions</h3><button class="btn-sm" onclick="switchView('transactions')">See all</button></div>
+          <div class="panel-head"><h3>Recent Transactions</h3><a class="btn-sm" href="/transactions" style="text-decoration:none;">See all</a></div>
           <div id="recentTxns">
             <div class="empty-state"><div class="empty-icon">📋</div><p>No transactions yet</p></div>
           </div>
         </div>
       </section>
 
-      <!-- ============ TRANSACTIONS ============ -->
-      <section class="view" id="view-transactions">
-        <div class="page-header">
-          <div><h1>Transactions</h1><p>Filter, review and export your full account statement.</p></div>
-          <div class="chip-row"><button class="btn-sm" onclick="exportCsv()">⬇️ Export CSV</button><button class="btn-sm accent" onclick="openTransferModal()">💸 New Transfer</button></div>
-        </div>
-        <div class="panel">
-          <div class="filter-row">
-            <div class="fg"><label>Type</label><select id="fType"><option value="">All types</option><option value="TRANSFER">Transfer</option><option value="DEPOSIT">Deposit</option><option value="WITHDRAWAL">Withdrawal</option></select></div>
-            <div class="fg"><label>From</label><input type="date" id="fFrom" /></div>
-            <div class="fg"><label>To</label><input type="date" id="fTo" /></div>
-            <div class="fg"><label>Per page</label><select id="fLimit"><option>10</option><option selected>20</option><option>50</option><option>100</option></select></div>
-            <button class="btn-sm accent" onclick="applyFilters()">Apply</button>
-            <button class="btn-sm" onclick="resetFilters()">Reset</button>
-          </div>
-          <div class="table-wrap">
-            <table class="data">
-              <thead><tr><th>Date</th><th>Description</th><th>Type</th><th>Reference</th><th>Status</th><th style="text-align:right;">Amount</th></tr></thead>
-              <tbody id="txnTableBody"><tr><td colspan="6" style="text-align:center;color:#7a8fa6;padding:30px;">Loading…</td></tr></tbody>
-            </table>
-          </div>
-          <div class="pager">
-            <span id="pagerInfo">—</span>
-            <div class="chip-row"><button class="btn-sm" onclick="pagePrev()">← Prev</button><button class="btn-sm" onclick="pageNext()">Next →</button></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ============ CARDS ============ -->
-      <section class="view" id="view-cards">
-        <div class="page-header">
-          <div><h1>Cards</h1><p>Issue, view and block debit or credit cards linked to your account.</p></div>
-          <button class="btn-sm accent" onclick="openModal('issueCardModal')">➕ Issue New Card</button>
-        </div>
-        <div class="cards-grid" id="cardsGrid"></div>
-      </section>
-
-      <!-- ============ LOANS ============ -->
-      <section class="view" id="view-loans">
-        <div class="page-header">
-          <div><h1>Loans</h1><p>Estimate your EMI, apply in seconds, and track repayment.</p></div>
-        </div>
-        <div class="grid-2">
-          <div class="panel">
-            <div class="panel-head"><div><h3>EMI Calculator</h3><div class="ph-sub">Numbers update live as you drag</div></div></div>
-            <div class="range-row">
-              <div class="rr-head"><span>Loan amount</span><b id="emiAmtLabel">₹5,00,000</b></div>
-              <input type="range" id="emiAmount" min="10000" max="5000000" step="10000" value="500000" oninput="calcEmi()" />
-            </div>
-            <div class="range-row">
-              <div class="rr-head"><span>Interest rate (p.a.)</span><b id="emiRateLabel">10.5%</b></div>
-              <input type="range" id="emiRate" min="6" max="24" step="0.1" value="10.5" oninput="calcEmi()" />
-            </div>
-            <div class="range-row">
-              <div class="rr-head"><span>Tenure</span><b id="emiTenureLabel">60 months</b></div>
-              <input type="range" id="emiTenure" min="6" max="360" step="6" value="60" oninput="calcEmi()" />
-            </div>
-            <div class="range-row">
-              <div class="rr-head"><span>Loan type</span></div>
-              <select id="emiType" style="width:100%;padding:11px 13px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#e0e6ed;font-family:inherit;">
-                <option value="PERSONAL">Personal Loan</option>
-                <option value="HOME">Home Loan</option>
-                <option value="VEHICLE">Vehicle Loan</option>
-                <option value="EDUCATION">Education Loan</option>
-              </select>
-            </div>
-            <div class="emi-out">
-              <div><label>Monthly EMI</label><strong id="emiOut">₹0</strong></div>
-              <div><label>Total Interest</label><strong id="emiInterest">₹0</strong></div>
-              <div><label>Total Payable</label><strong id="emiTotal">₹0</strong></div>
-            </div>
-            <button class="btn-sm accent" style="margin-top:18px;width:100%;padding:13px;" id="loanApplyBtn" onclick="applyLoan()">Apply for this loan</button>
-            <div id="loanError" class="error-msg" style="margin-top:14px;"></div>
-          </div>
-          <div class="panel">
-            <div class="panel-head"><div><h3>My Loans</h3><div class="ph-sub">Applications and repayment progress</div></div></div>
-            <div id="loansList" style="display:flex;flex-direction:column;gap:14px;"></div>
-          </div>
-        </div>
-      </section>
+      <!-- Transactions / Cards / Loans are served by their own services -->
 
       <!-- ============ BENEFICIARIES ============ -->
       <section class="view" id="view-beneficiaries">
@@ -1076,27 +999,6 @@
       <div class="modal-actions">
         <button class="btn-cancel" onclick="closeModal('withdrawModal')">Cancel</button>
         <button class="btn-submit ripple-btn" onclick="submitWithdraw(event)">Withdraw</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Issue Card Modal -->
-  <div id="issueCardModal" class="modal-overlay">
-    <div class="modal">
-      <h3>💳 Issue a New Card</h3>
-      <p class="modal-sub">Pick a card type and network — issued instantly</p>
-      <div id="cardError" class="error-msg"></div>
-      <div class="form-group">
-        <label>Card Type</label>
-        <select id="cardType"><option value="DEBIT">Debit Card</option><option value="CREDIT">Credit Card (₹1,00,000 limit)</option></select>
-      </div>
-      <div class="form-group">
-        <label>Network</label>
-        <select id="cardNetwork"><option value="RUPAY">RuPay</option><option value="VISA">Visa</option><option value="MASTERCARD">Mastercard</option></select>
-      </div>
-      <div class="modal-actions">
-        <button class="btn-cancel" onclick="closeModal('issueCardModal')">Cancel</button>
-        <button class="btn-submit ripple-btn" id="issueCardBtn" onclick="submitCard(event)">Issue Card</button>
       </div>
     </div>
   </div>
@@ -1409,17 +1311,14 @@
     /* ================= DASHBOARD ================= */
     const state = {
       view: 'overview',
-      txns: [],          // cache of recent txns (for charts + search)
-      pageTxns: [],      // current page rows in Transactions view
-      total: 0, offset: 0, limit: 20,
-      notifs: [], cards: [], loans: [], bens: [],
-      cardNumbers: {}, cardShown: new Set(), cardTimers: {},
+      txns: [],          // cache of recent txns (for charts + global search)
+      notifs: [], bens: [],
       balanceHidden: localStorage.getItem('balHidden') === '1',
       balance: 0, accNum: '-'
     };
 
     const VIEW_TITLES = {
-      overview: 'Overview', transactions: 'Transactions', cards: 'Cards', loans: 'Loans',
+      overview: 'Overview',
       beneficiaries: 'Beneficiaries', notifications: 'Notifications', profile: 'Profile'
     };
 
@@ -1441,9 +1340,6 @@
       document.getElementById('tbTitle').textContent = VIEW_TITLES[name] || 'Dashboard';
       document.getElementById('sidebar').classList.remove('open');
       window.scrollTo({ top: 0, behavior: 'auto' });
-      if (name === 'transactions') loadTxns();
-      if (name === 'cards') loadCards();
-      if (name === 'loans') { loadLoans(); calcEmi(); }
       if (name === 'beneficiaries') loadBens();
       if (name === 'notifications') renderNotifsFull();
       if (name === 'profile') loadProfile();
@@ -1636,60 +1532,7 @@
         `<span><i style="background:#34d399"></i>In ${money0(cr)}</span><span><i style="background:#f87171"></i>Out ${money0(db)}</span>`;
     }
 
-    /* ---------- Transactions view ---------- */
-    function txnQuery() {
-      const p = new URLSearchParams();
-      const type = document.getElementById('fType').value;
-      const from = document.getElementById('fFrom').value;
-      const to = document.getElementById('fTo').value;
-      if (type) p.set('type', type);
-      if (from) p.set('date_from', from);
-      if (to) p.set('date_to', to);
-      p.set('limit', state.limit); p.set('offset', state.offset);
-      return p.toString();
-    }
-    function applyFilters() { state.limit = parseInt(document.getElementById('fLimit').value, 10) || 20; state.offset = 0; loadTxns(); }
-    function resetFilters() {
-      document.getElementById('fType').value = ''; document.getElementById('fFrom').value = '';
-      document.getElementById('fTo').value = ''; document.getElementById('fLimit').value = '20';
-      state.limit = 20; state.offset = 0; loadTxns();
-    }
-    function pagePrev() { if (state.offset === 0) return; state.offset = Math.max(0, state.offset - state.limit); loadTxns(); }
-    function pageNext() { if (state.offset + state.limit >= state.total) return; state.offset += state.limit; loadTxns(); }
-
-    async function loadTxns() {
-      if (!account) return;
-      const body = document.getElementById('txnTableBody');
-      body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#7a8fa6;padding:30px;">Loading…</td></tr>';
-      try {
-        const res = await fetch(`${API}/transactions/${account.id}?${txnQuery()}`);
-        const data = await res.json();
-        if (!data.success) throw new Error('Failed');
-        state.pageTxns = data.transactions; state.total = data.total;
-        if (!data.transactions.length) {
-          body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#7a8fa6;padding:36px;">No transactions match these filters</td></tr>';
-        } else {
-          body.innerHTML = data.transactions.map(t => {
-            const cr = isCredit(t);
-            const st = t.status === 'COMPLETED' ? 'green' : t.status === 'FAILED' ? 'red' : 'amber';
-            return `<tr onclick="openTxnDetail('${esc(t.reference_id)}')" style="cursor:pointer;">
-              <td style="white-space:nowrap;">${dt(t.created_at)}</td>
-              <td>${esc(t.description || t.type)}</td>
-              <td><span class="pill blue">${esc(t.type)}</span></td>
-              <td style="font-family:monospace;font-size:0.78rem;color:#7a8fa6;">${esc(t.reference_id || '-')}</td>
-              <td><span class="pill ${st}">${esc(t.status)}</span></td>
-              <td style="text-align:right;font-weight:700;color:${cr ? '#34d399' : '#f87171'};white-space:nowrap;">${cr ? '+' : '-'}${money(t.amount)}</td>
-            </tr>`;
-          }).join('');
-        }
-        const from = state.total === 0 ? 0 : state.offset + 1;
-        const to = Math.min(state.offset + state.limit, state.total);
-        document.getElementById('pagerInfo').textContent = `Showing ${from}–${to} of ${state.total}`;
-      } catch (e) {
-        body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#fca5a5;padding:30px;">Could not load transactions</td></tr>';
-      }
-    }
-
+    /* ---------- Transaction detail (opened from global search) ---------- */
     async function openTxnDetail(ref) {
       if (!ref || ref === '-') return;
       openModal('txnDetailModal');
@@ -1711,23 +1554,6 @@
       } catch (err) {
         el.innerHTML = `<div><span style="color:#fca5a5;">${esc(err.message)}</span></div>`;
       }
-    }
-
-    function exportCsv() {
-      const rows = (state.pageTxns.length ? state.pageTxns : state.txns);
-      if (!rows.length) { showToast('Nothing to export yet', true); return; }
-      const head = ['Date', 'Reference', 'Type', 'Description', 'From', 'To', 'Direction', 'Amount', 'Status'];
-      const lines = rows.map(t => [
-        new Date(t.created_at).toISOString(), t.reference_id || '', t.type, (t.description || '').replace(/"/g, "'"),
-        t.sender_account || '', t.receiver_account || '', isCredit(t) ? 'CREDIT' : 'DEBIT', t.amount, t.status
-      ]);
-      const csv = [head, ...lines].map(r => r.map(c => `"${String(c == null ? '' : c)}"`).join(',')).join('\r\n');
-      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `statement_${state.accNum}_${new Date().toISOString().slice(0, 10)}.csv`;
-      a.click(); URL.revokeObjectURL(a.href);
-      showToast('Statement exported');
     }
 
     /* ---------- Global search ---------- */
@@ -1795,226 +1621,6 @@
         await loadNotifs(); await loadDashboard();
         showToast('All notifications marked read');
       } catch (e) { showToast('Could not update notifications', true); }
-    }
-
-    /* ---------- Cards ---------- */
-    async function loadCards() {
-      if (!account) return;
-      const grid = document.getElementById('cardsGrid');
-      grid.innerHTML = '<div style="color:#7a8fa6;font-size:0.88rem;">Loading…</div>';
-      try {
-        const res = await fetch(`${API}/cards/${account.id}`);
-        const list = await res.json();
-        state.cards = Array.isArray(list) ? list : [];
-        if (!state.cards.length) {
-          grid.innerHTML = `<div class="panel" style="grid-column:1/-1;"><div class="empty-state"><div class="empty-icon">💳</div>
-            <p>No cards yet. Issue a debit or credit card in one click.</p>
-            <button class="btn-sm accent" style="margin-top:16px;" onclick="openModal('issueCardModal')">➕ Issue New Card</button></div></div>`;
-          return;
-        }
-        grid.innerHTML = state.cards.map(c => {
-          const cls = (c.card_type === 'CREDIT' ? 'credit' : 'debit') + (c.status === 'BLOCKED' ? ' blocked' : '');
-          const blocked = c.status === 'BLOCKED';
-          return `<div class="card-wrap">
-            <div class="bank-card ${cls}" id="card-${c.id}">
-              <span class="bc-shine"></span>
-              <div class="bc-top"><div class="bc-chip"></div><div style="text-align:right;">
-                <div style="font-weight:800;letter-spacing:1px;">${esc(c.card_network)}</div>
-                <span class="pill ${blocked ? 'red' : 'green'}">${esc(c.status)}</span></div></div>
-              <div>
-                <div class="bc-num-row">
-                  <div class="bc-num" id="cardNum-${c.id}">${esc(c.card_number_masked)}</div>
-                  <button class="bc-icon" id="cardEye-${c.id}" onclick="toggleCardNumber(${c.id})" title="Show / hide card number" aria-label="Show or hide card number">👁️</button>
-                  <button class="bc-icon" onclick="copyCardNumber(${c.id})" title="Copy card number" aria-label="Copy card number">📋</button>
-                </div>
-                <div class="bc-bottom">
-                  <div><label>Card Holder</label>${esc(user.full_name)}</div>
-                  <div><label>Expires</label>${esc(c.expiry_date)}</div>
-                  <div><label>Type</label>${esc(c.card_type)}</div>
-                </div>
-              </div>
-            </div>
-            ${c.card_type === 'CREDIT' ? `<div style="margin-top:12px;">
-              <div class="rr-head" style="display:flex;justify-content:space-between;font-size:0.78rem;color:#8fa3bb;margin-bottom:6px;">
-                <span>Available credit</span><b style="color:#fff;">${money0(c.available_balance)} / ${money0(c.credit_limit)}</b></div>
-              <div class="progress"><i style="width:${c.credit_limit ? Math.min(100, (c.available_balance / c.credit_limit) * 100) : 0}%"></i></div>
-            </div>` : ''}
-            <div class="bc-actions">
-              ${blocked
-                ? `<button class="btn-sm accent" id="cardBtn-${c.id}" onclick="setCardBlocked(${c.id}, false)">✅ Unblock Card</button>`
-                : `<button class="btn-sm danger" id="cardBtn-${c.id}" onclick="setCardBlocked(${c.id}, true)">🚫 Block Card</button>`}
-              <span class="btn-sm" style="cursor:default;opacity:.65;">Issued ${new Date(c.created_at).toLocaleDateString('en-IN')}</span>
-            </div>
-          </div>`;
-        }).join('');
-        // re-apply any numbers the user had revealed before a refresh
-        state.cards.forEach(c => { if (state.cardShown.has(c.id)) applyCardNumber(c.id, true); });
-      } catch (e) {
-        grid.innerHTML = '<div style="color:#fca5a5;">Could not load cards</div>';
-      }
-    }
-
-    async function submitCard(e) {
-      e.preventDefault();
-      const btn = document.getElementById('issueCardBtn');
-      const errEl = document.getElementById('cardError'); errEl.style.display = 'none';
-      setBtnLoading(btn, true);
-      try {
-        const res = await fetch(`${API}/cards`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ account_id: account.id, card_type: document.getElementById('cardType').value, card_network: document.getElementById('cardNetwork').value })
-        });
-        const data = await res.json();
-        if (!res.ok || !data.success) throw new Error(data.message || 'Could not issue card');
-        closeModal('issueCardModal');
-        showToast(`${data.card.card_type} card issued: ${data.card.card_number_masked}`);
-        await loadCards();
-      } catch (err) { errEl.textContent = err.message; errEl.style.display = 'block'; }
-      finally { setBtnLoading(btn, false, 'Issue Card'); }
-    }
-
-    /* Reveal / hide the real card number (fetched on demand, cached in memory only) */
-    async function fetchCardNumber(id) {
-      if (state.cardNumbers[id]) return state.cardNumbers[id];
-      const res = await fetch(`${API}/cards/${id}/reveal`);
-      const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.message || 'Could not reveal card number');
-      state.cardNumbers[id] = data.card.card_number_formatted;
-      return state.cardNumbers[id];
-    }
-
-    function applyCardNumber(id, show) {
-      const numEl = document.getElementById('cardNum-' + id);
-      const eyeEl = document.getElementById('cardEye-' + id);
-      if (!numEl) return;
-      const card = state.cards.find(c => c.id === id);
-      numEl.textContent = show ? state.cardNumbers[id] : (card ? card.card_number_masked : '•••• •••• •••• ••••');
-      numEl.classList.toggle('revealed', !!show);
-      if (eyeEl) eyeEl.textContent = show ? '🙈' : '👁️';
-    }
-
-    async function toggleCardNumber(id) {
-      if (state.cardShown.has(id)) {
-        state.cardShown.delete(id);
-        clearTimeout(state.cardTimers[id]);
-        applyCardNumber(id, false);
-        return;
-      }
-      const eyeEl = document.getElementById('cardEye-' + id);
-      if (eyeEl) eyeEl.textContent = '⏳';
-      try {
-        await fetchCardNumber(id);
-        state.cardShown.add(id);
-        applyCardNumber(id, true);
-        // auto-hide again after 20s so the number isn't left on screen
-        clearTimeout(state.cardTimers[id]);
-        state.cardTimers[id] = setTimeout(() => {
-          state.cardShown.delete(id);
-          applyCardNumber(id, false);
-        }, 20000);
-      } catch (err) {
-        if (eyeEl) eyeEl.textContent = '👁️';
-        showToast(err.message, true);
-      }
-    }
-
-    async function copyCardNumber(id) {
-      try {
-        const num = await fetchCardNumber(id);
-        const plain = num.replace(/\s/g, '');
-        if (navigator.clipboard) await navigator.clipboard.writeText(plain);
-        else throw new Error('Clipboard unavailable');
-        showToast('Card number copied');
-      } catch (err) { showToast(err.message || 'Copy failed', true); }
-    }
-
-    /* Block / unblock toggle */
-    async function setCardBlocked(id, block) {
-      if (block && !confirm('Block this card? You can unblock it again from this page.')) return;
-      const btn = document.getElementById('cardBtn-' + id);
-      const label = btn ? btn.textContent : '';
-      if (btn) { btn.disabled = true; btn.textContent = block ? 'Blocking…' : 'Unblocking…'; }
-      try {
-        const res = await fetch(`${API}/cards/${id}/${block ? 'block' : 'unblock'}`, { method: 'PATCH' });
-        const data = await res.json();
-        if (!res.ok || !data.success) throw new Error(data.message || 'Request failed');
-        showToast(block ? 'Card blocked' : 'Card unblocked');
-        await loadCards();
-      } catch (e) {
-        if (btn) { btn.disabled = false; btn.textContent = label; }
-        showToast(e.message, true);
-      }
-    }
-
-    /* ---------- Loans ---------- */
-    function calcEmi() {
-      const P = parseFloat(document.getElementById('emiAmount').value);
-      const rate = parseFloat(document.getElementById('emiRate').value);
-      const N = parseInt(document.getElementById('emiTenure').value, 10);
-      document.getElementById('emiAmtLabel').textContent = money0(P);
-      document.getElementById('emiRateLabel').textContent = rate.toFixed(1) + '%';
-      document.getElementById('emiTenureLabel').textContent = `${N} months (${(N / 12).toFixed(1)} yrs)`;
-      const r = rate / 12 / 100;
-      const emi = P * r * Math.pow(1 + r, N) / (Math.pow(1 + r, N) - 1);
-      const total = emi * N;
-      document.getElementById('emiOut').textContent = money0(emi);
-      document.getElementById('emiInterest').textContent = money0(total - P);
-      document.getElementById('emiTotal').textContent = money0(total);
-    }
-
-    async function applyLoan() {
-      const errEl = document.getElementById('loanError'); errEl.style.display = 'none';
-      const btn = document.getElementById('loanApplyBtn');
-      setBtnLoading(btn, true);
-      try {
-        const res = await fetch(`${API}/loans`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            account_id: account.id,
-            loan_type: document.getElementById('emiType').value,
-            principal: parseFloat(document.getElementById('emiAmount').value),
-            interest_rate: parseFloat(document.getElementById('emiRate').value),
-            tenure_months: parseInt(document.getElementById('emiTenure').value, 10)
-          })
-        });
-        const data = await res.json();
-        if (!res.ok || !data.success) throw new Error(data.message || 'Application failed');
-        showToast('Loan application submitted — status: PENDING');
-        await loadLoans();
-      } catch (err) { errEl.textContent = err.message; errEl.style.display = 'block'; }
-      finally { setBtnLoading(btn, false, 'Apply for this loan'); }
-    }
-
-    async function loadLoans() {
-      if (!account) return;
-      const el = document.getElementById('loansList');
-      el.innerHTML = '<div style="color:#7a8fa6;font-size:0.88rem;">Loading…</div>';
-      try {
-        const res = await fetch(`${API}/loans/${account.id}`);
-        const list = await res.json();
-        state.loans = Array.isArray(list) ? list : [];
-        if (!state.loans.length) {
-          el.innerHTML = '<div class="empty-state"><div class="empty-icon">🏦</div><p>No loans yet. Use the calculator to model one and apply.</p></div>';
-          return;
-        }
-        el.innerHTML = state.loans.map(l => {
-          const pct = l.total_payable ? Math.min(100, (l.amount_paid / l.total_payable) * 100) : 0;
-          const st = l.status === 'APPROVED' || l.status === 'ACTIVE' ? 'green' : l.status === 'REJECTED' ? 'red' : 'amber';
-          return `<div class="loan-card">
-            <div class="lc-top"><strong>${esc(l.loan_type)} Loan</strong><span class="pill ${st}">${esc(l.status)}</span></div>
-            <div class="loan-meta">
-              <div><label>Principal</label><span>${money0(l.principal)}</span></div>
-              <div><label>Rate</label><span>${l.interest_rate}%</span></div>
-              <div><label>Tenure</label><span>${l.tenure_months} mo</span></div>
-              <div><label>EMI</label><span>${money0(l.emi)}</span></div>
-              <div><label>Total Payable</label><span>${money0(l.total_payable)}</span></div>
-            </div>
-            <div class="rr-head" style="display:flex;justify-content:space-between;font-size:0.76rem;color:#8fa3bb;margin-bottom:6px;">
-              <span>Repaid</span><b style="color:#fff;">${money0(l.amount_paid)} (${pct.toFixed(0)}%)</b></div>
-            <div class="progress"><i style="width:${pct}%"></i></div>
-          </div>`;
-        }).join('');
-      } catch (e) { el.innerHTML = '<div style="color:#fca5a5;">Could not load loans</div>'; }
     }
 
     /* ---------- Beneficiaries ---------- */

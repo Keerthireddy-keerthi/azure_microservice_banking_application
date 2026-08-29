@@ -1,11 +1,37 @@
+# banking-ui — main UI (login / register / dashboard) AND the ingress custom
+# error backend. When cards-ui, transactions-ui or loans-ui has no ready pods,
+# the ingress forwards the request here and we serve the animated 404 page.
+
+# The ingress sets X-Format to the original Accept header. Browsers get the
+# animated HTML page; fetch/XHR callers that asked for JSON get JSON.
+map $http_x_format $error_body {
+    default   /error.html;
+    ~*json    /error.json;
+}
+
 server {
     listen 3000;
     server_name _;
     root /usr/share/nginx/html;
     index index.html;
 
+    # SSI lets the error page name the service that went down, using the
+    # X-Service-Name / X-Code / X-Original-URI headers the ingress sends.
+    ssi on;
+    ssi_types text/html application/json;
+
+    error_page 404 $error_body;
+
+    location = /error.html { internal; default_type text/html; }
+    location = /error.json { internal; default_type application/json; }
+
     # Serve static files
     location / {
+        # Requests forwarded by the ingress custom-error handler always carry
+        # X-Code. Those must render the goodbye page, not the dashboard SPA.
+        if ($http_x_code != "") {
+            return 404;
+        }
         try_files $uri $uri/ /index.html;
     }
 

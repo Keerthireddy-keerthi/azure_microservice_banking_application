@@ -14,10 +14,10 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    # When a frontend service has no ready pods, or an upstream returns one of
-    # the codes below, serve the animated 404 "Good bye" page from error-pages
-    # instead of the raw nginx gateway error. See k8s/07a-error-pages.yaml.
-    nginx.ingress.kubernetes.io/default-backend: error-pages
+    # When cards-ui / transactions-ui / loans-ui has no ready pods, serve the
+    # animated 404 "Good bye" page that lives inside banking-ui
+    # (frontend/banking-ui/public/error.html) instead of a raw gateway error.
+    nginx.ingress.kubernetes.io/default-backend: banking-ui
     nginx.ingress.kubernetes.io/custom-http-errors: "502,503,504"
 spec:
   ingressClassName: nginx

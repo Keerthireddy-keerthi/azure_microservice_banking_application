@@ -159,7 +159,10 @@
   <div id="toast" class="toast"></div>
 
   <script>
-    const API = '/api';
+    // Routed through this service's OWN nginx: the ingress strips the /loans
+    // prefix, then loans-ui proxies /api/ to backend-service. Keeps the
+    // loans service independent of banking-ui.
+    const API = '/loans/api';
     let user = JSON.parse(localStorage.getItem('user') || 'null');
     let account = JSON.parse(localStorage.getItem('account') || 'null');
 

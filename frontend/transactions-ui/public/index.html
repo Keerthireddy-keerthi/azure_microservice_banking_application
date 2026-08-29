@@ -162,7 +162,10 @@
   <div id="toast" class="toast"></div>
 
   <script>
-    const API = '/api';
+    // Routed through this service's OWN nginx: the ingress strips the
+    // /transactions prefix, then transactions-ui proxies /api/ to
+    // backend-service. Keeps the transactions service independent.
+    const API = '/transactions/api';
     let user = JSON.parse(localStorage.getItem('user') || 'null');
     let account = JSON.parse(localStorage.getItem('account') || 'null');
     const PAGE_SIZE = 15;
