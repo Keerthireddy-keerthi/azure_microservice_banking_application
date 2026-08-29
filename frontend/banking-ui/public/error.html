@@ -136,10 +136,20 @@
     .say { display: flex; flex-direction: column; align-items: center; gap: 1px; margin-top: 8px; }
     .goodbye {
       margin: 0; font-size: clamp(1rem, 3.2vw, 1.4rem); font-weight: 800;
-      background-image: linear-gradient(135deg, var(--c1, #4facfe), var(--c2, #00f2fe));
-      -webkit-background-clip: text; background-clip: text;
+      /* Solid visible fallback: if the gradient text-clip below is not honoured
+         the letters still show in this colour instead of staying invisible. */
+      color: var(--c1, #4facfe);
     }
-    .goodbye span { display: inline-block; color: transparent; -webkit-text-fill-color: transparent; animation: letterDrop .5s ease both; }
+    /* Only browsers that support clipping the background to the text switch the
+       letters to transparent so the gradient shows through. */
+    @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+      .goodbye {
+        background-image: linear-gradient(135deg, var(--c1, #4facfe), var(--c2, #00f2fe));
+        -webkit-background-clip: text; background-clip: text;
+      }
+      .goodbye span { color: transparent; -webkit-text-fill-color: transparent; }
+    }
+    .goodbye span { display: inline-block; animation: letterDrop .5s ease both; }
     .goodbye .sp { width: .3em; }
     /* colour emoji must keep its own fill, otherwise it renders invisible */
     .goodbye .emo { color: #e0e6ed; -webkit-text-fill-color: initial; }
@@ -289,7 +299,13 @@
       .ring { width: 168px; height: 168px; } .ring.slow { width: 232px; height: 232px; }
       .sat { width: 34px; height: 34px; margin: -17px 0 0 -17px; font-size: .9rem; }
     }
-    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; }
+      /* letterDrop starts at opacity:0; with animations off the letters would
+         stay invisible, so force them fully visible here. */
+      .goodbye span { opacity: 1 !important; transform: none !important; }
+      .telugu-note p { opacity: 1 !important; transform: none !important; }
+    }
   </style>
 </head>
 <body>
