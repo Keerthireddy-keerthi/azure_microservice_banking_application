@@ -130,11 +130,12 @@
       content: ''; position: absolute; inset: 2px; border-radius: 50%;
       border: 2px solid rgba(79,172,254,0.5); animation: pulseRing 2.2s ease-out infinite;
     }
-    /* The headline cycles Telugu -> Hindi -> English, each with its own
-       palette. The gradient sits on the parent and is clipped to the text, so
-       every letter span must be transparent-filled for it to show through. */
+    /* The same question in three languages, stacked under the 404 and typed in
+       one line at a time. The gradient sits on each line and is clipped to the
+       text, so every letter span must be transparent-filled to show it. */
+    .say { display: flex; flex-direction: column; align-items: center; gap: 1px; margin-top: 8px; }
     .goodbye {
-      font-size: clamp(1.15rem, 3.9vw, 1.75rem); font-weight: 800; margin-top: 6px;
+      margin: 0; font-size: clamp(1rem, 3.2vw, 1.4rem); font-weight: 800;
       background-image: linear-gradient(135deg, var(--c1, #4facfe), var(--c2, #00f2fe));
       -webkit-background-clip: text; background-clip: text;
     }
@@ -145,8 +146,6 @@
     .goodbye.te { font-family: 'Noto Sans Telugu', 'Inter', sans-serif; --c1: #34d399; --c2: #00f2fe; }
     .goodbye.hi { font-family: 'Noto Sans Devanagari', 'Inter', sans-serif; --c1: #fbbf24; --c2: #fb7185; }
     .goodbye.en { font-family: 'Inter', sans-serif; --c1: #4facfe; --c2: #a78bfa; }
-
-    .lang-hint { margin-top: 5px; font-size: .68rem; letter-spacing: 1.6px; text-transform: uppercase; color: #5f7489; }
 
     .sub { color: #7a8fa6; font-size: .96rem; line-height: 1.65; max-width: 500px; margin: 12px auto 0; }
 
@@ -310,8 +309,7 @@
     </div>
 
     <div class="hand-zone"><span class="hand" aria-hidden="true">👋</span></div>
-    <p class="goodbye te" id="goodbye" aria-live="polite" aria-label="Where is the pod?"></p>
-    <p class="lang-hint" id="langHint">తెలుగు</p>
+    <div class="say" id="say"></div>
 
     <p class="sub">
       This microservice has left the cluster — zero ready pods, so nginx has
@@ -422,25 +420,24 @@
       place('ringOuter', outer);
     })();
 
-    /* ---------- Headline: same question, cycled through 3 languages ---------- */
+    /* ---------- Same question in 3 languages, revealed one line at a time ---------- */
     (function () {
-      var host = document.getElementById('goodbye');
-      var hint = document.getElementById('langHint');
+      var host = document.getElementById('say');
       var variants = [
-        { cls: 'te', lang: 'te', label: 'తెలుగు',  text: 'పాడ్ ఎక్కడ రా బాబూ? 😐' },
-        { cls: 'hi', lang: 'hi', label: 'हिन्दी',   text: 'पॉड कहाँ है भाई? 😐' },
-        { cls: 'en', lang: 'en', label: 'English', text: 'Where is the pod, bro? 😐' }
+        { cls: 'te', lang: 'te', text: 'పాడ్ ఎక్కడ రా బాబూ? 😐' },
+        { cls: 'hi', lang: 'hi', text: 'पॉड कहाँ है भाई? 😐' },
+        { cls: 'en', lang: 'en', text: 'Where is the pod, bro? 😐' }
       ];
-      var i = 0;
+      var delay = 0.25;   // seconds, accumulates so lines land one after another
 
-      function render(v) {
-        host.className = 'goodbye ' + v.cls;
-        host.setAttribute('lang', v.lang);
-        host.textContent = '';
-        hint.textContent = v.label;
+      variants.forEach(function (v) {
+        var p = document.createElement('p');
+        p.className = 'goodbye ' + v.cls;
+        p.setAttribute('lang', v.lang);
+        p.setAttribute('aria-label', v.text);
         // Array.from splits by code point, so the emoji survives intact
         // (plain split('') would tear its surrogate pair in half).
-        Array.from(v.text).forEach(function (ch, n) {
+        Array.from(v.text).forEach(function (ch) {
           var s = document.createElement('span');
           if (ch === ' ') {
             s.className = 'sp';
@@ -449,16 +446,13 @@
             // emoji keeps its own colour instead of the clipped gradient
             if (ch.codePointAt(0) > 0xFFFF) s.className = 'emo';
           }
-          s.style.animationDelay = (0.25 + n * 0.045) + 's';
-          host.appendChild(s);
+          s.style.animationDelay = delay.toFixed(2) + 's';
+          delay += 0.04;
+          p.appendChild(s);
         });
-      }
-
-      render(variants[0]);
-      setInterval(function () {
-        i = (i + 1) % variants.length;
-        render(variants[i]);
-      }, 4200);
+        delay += 0.35;    // beat between languages
+        host.appendChild(p);
+      });
     })();
 
     /* ---------- Typed kubectl transcript ---------- */
