@@ -202,3 +202,7 @@ Use the **EXTERNAL-IP** to access your app. Update `k8s/08-ingress.yaml` host if
 - Only the **backend-service** needs MySQL credentials — frontend UIs are purely static
 - Backend is never exposed to internet — accessed only through frontend nginx `proxy_pass`
 - Images are tagged with git commit SHA for traceability
+
+
+
+------------------------- Thanks --------------------------
