@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
         - name: transactions-ui
-          image: bankingappveeraacr.azurecr.io/transactions-ui:e80dfd351b762fc8073ff438d1f7ec48d6052a6f
+          image: bankingappveeraacr.azurecr.io/transactions-ui:f74e76888548f3fee609d0c752418233922f556b
           env:
             - name: BACKEND_URL
               value: "http://backend-service.banking-app.svc.cluster.local:8080"
