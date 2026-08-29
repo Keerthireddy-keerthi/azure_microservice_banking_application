@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>404 — Service Unavailable | Veera_NareshIT_Bank</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+Telugu:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+Telugu:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -119,6 +119,8 @@
     @supports not ((-webkit-background-clip: text) or (background-clip: text)) {
       .gtext { background-image: none; color: #4facfe; -webkit-text-fill-color: #4facfe; }
       .code-404 .g { display: none; }
+      .goodbye { background-image: none; }
+      .goodbye span { color: var(--c1, #4facfe); -webkit-text-fill-color: var(--c1, #4facfe); }
     }
 
     /* ═══════════ Hand + goodbye ═══════════ */
@@ -128,9 +130,23 @@
       content: ''; position: absolute; inset: 2px; border-radius: 50%;
       border: 2px solid rgba(79,172,254,0.5); animation: pulseRing 2.2s ease-out infinite;
     }
-    .goodbye { font-size: clamp(1.3rem, 4.4vw, 2rem); font-weight: 800; color: #fff; margin-top: 4px; }
-    .goodbye span { display: inline-block; animation: letterDrop .5s ease both; }
-    .goodbye .sp { width: .32em; }
+    /* The headline cycles Telugu -> Hindi -> English, each with its own
+       palette. The gradient sits on the parent and is clipped to the text, so
+       every letter span must be transparent-filled for it to show through. */
+    .goodbye {
+      font-size: clamp(1.15rem, 3.9vw, 1.75rem); font-weight: 800; margin-top: 6px;
+      background-image: linear-gradient(135deg, var(--c1, #4facfe), var(--c2, #00f2fe));
+      -webkit-background-clip: text; background-clip: text;
+    }
+    .goodbye span { display: inline-block; color: transparent; -webkit-text-fill-color: transparent; animation: letterDrop .5s ease both; }
+    .goodbye .sp { width: .3em; }
+    /* colour emoji must keep its own fill, otherwise it renders invisible */
+    .goodbye .emo { color: #e0e6ed; -webkit-text-fill-color: initial; }
+    .goodbye.te { font-family: 'Noto Sans Telugu', 'Inter', sans-serif; --c1: #34d399; --c2: #00f2fe; }
+    .goodbye.hi { font-family: 'Noto Sans Devanagari', 'Inter', sans-serif; --c1: #fbbf24; --c2: #fb7185; }
+    .goodbye.en { font-family: 'Inter', sans-serif; --c1: #4facfe; --c2: #a78bfa; }
+
+    .lang-hint { margin-top: 5px; font-size: .68rem; letter-spacing: 1.6px; text-transform: uppercase; color: #5f7489; }
 
     .sub { color: #7a8fa6; font-size: .96rem; line-height: 1.65; max-width: 500px; margin: 12px auto 0; }
 
@@ -294,7 +310,8 @@
     </div>
 
     <div class="hand-zone"><span class="hand" aria-hidden="true">👋</span></div>
-    <p class="goodbye" id="goodbye" aria-label="Pod ekkada ra babu?"></p>
+    <p class="goodbye te" id="goodbye" aria-live="polite" aria-label="Where is the pod?"></p>
+    <p class="lang-hint" id="langHint">తెలుగు</p>
 
     <p class="sub">
       This microservice has left the cluster — zero ready pods, so nginx has
@@ -405,17 +422,43 @@
       place('ringOuter', outer);
     })();
 
-    /* ---------- Headline letter drop ---------- */
+    /* ---------- Headline: same question, cycled through 3 languages ---------- */
     (function () {
       var host = document.getElementById('goodbye');
-      // Array.from splits by code point, so the emoji survives intact
-      // (plain split('') would tear its surrogate pair in half).
-      Array.from('Pod ekkada ra babu? 😐').forEach(function (ch, i) {
-        var s = document.createElement('span');
-        if (ch === ' ') { s.className = 'sp'; } else { s.textContent = ch; }
-        s.style.animationDelay = (0.3 + i * 0.045) + 's';
-        host.appendChild(s);
-      });
+      var hint = document.getElementById('langHint');
+      var variants = [
+        { cls: 'te', lang: 'te', label: 'తెలుగు',  text: 'పాడ్ ఎక్కడ రా బాబూ? 😐' },
+        { cls: 'hi', lang: 'hi', label: 'हिन्दी',   text: 'पॉड कहाँ है भाई? 😐' },
+        { cls: 'en', lang: 'en', label: 'English', text: 'Where is the pod, bro? 😐' }
+      ];
+      var i = 0;
+
+      function render(v) {
+        host.className = 'goodbye ' + v.cls;
+        host.setAttribute('lang', v.lang);
+        host.textContent = '';
+        hint.textContent = v.label;
+        // Array.from splits by code point, so the emoji survives intact
+        // (plain split('') would tear its surrogate pair in half).
+        Array.from(v.text).forEach(function (ch, n) {
+          var s = document.createElement('span');
+          if (ch === ' ') {
+            s.className = 'sp';
+          } else {
+            s.textContent = ch;
+            // emoji keeps its own colour instead of the clipped gradient
+            if (ch.codePointAt(0) > 0xFFFF) s.className = 'emo';
+          }
+          s.style.animationDelay = (0.25 + n * 0.045) + 's';
+          host.appendChild(s);
+        });
+      }
+
+      render(variants[0]);
+      setInterval(function () {
+        i = (i + 1) % variants.length;
+        render(variants[i]);
+      }, 4200);
     })();
 
     /* ---------- Typed kubectl transcript ---------- */
