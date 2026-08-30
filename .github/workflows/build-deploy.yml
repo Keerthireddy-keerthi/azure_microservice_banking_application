@@ -13,7 +13,7 @@ env:
 
 jobs:
   # ─────────────────────────────────────────────────────────────────────────
-  # Job 1: Build all Docker images and push to ACR
+  # Job 1: Build all Docker images(banking, cards, loans, transactions and push to ACR
   # ─────────────────────────────────────────────────────────────────────────
   build:
     name: Build & Push Images
