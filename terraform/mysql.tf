@@ -1,4 +1,4 @@
-resource "azurerm_mysql_flexible_server" "mysql" {
+resource "azurerm_mysql_flexible_server" "mysqll" {
   name                   = "${var.project_name}-mysql"
   resource_group_name    = azurerm_resource_group.data.name
   location               = azurerm_resource_group.data.location
@@ -21,7 +21,7 @@ resource "azurerm_mysql_flexible_server" "mysql" {
   }
 }
 
-resource "azurerm_mysql_flexible_database" "banking_db" {
+resource "azurerm_mysql_flexible_database" "banking_dbb" {
   name                = var.db_name
   resource_group_name = azurerm_resource_group.data.name
   server_name         = azurerm_mysql_flexible_server.mysql.name
