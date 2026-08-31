@@ -20,7 +20,7 @@ env:
   ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
   PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
   TF_STATE_RG: terraform-state-rg
-  TF_STATE_SA: vaboraterraformstate
+  TF_STATE_SA: keerthiterraformstate2026
   TF_STATE_CONTAINER: tfstate
 
 jobs:
