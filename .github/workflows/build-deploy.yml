@@ -6,8 +6,8 @@ on:
 env:
   RESOURCE_GROUP: dev-veera-narni
   AKS_CLUSTER_NAME: bankingapp-aks
-  ACR_NAME: bankingappveeraacr
-  ACR_LOGIN_SERVER: bankingappveeraacr.azurecr.io
+  ACR_NAME: kheer
+  ACR_LOGIN_SERVER: kheer-h8e3d6eabpdnddgv.azurecr.io
   PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
   IMAGE_TAG: ${{ github.sha }}
 
