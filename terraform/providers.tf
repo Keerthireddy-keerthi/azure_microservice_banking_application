@@ -17,7 +17,7 @@ terraform {
 
   backend "azurerm" {
     resource_group_name  = "terraform-state-rg"
-    storage_account_name = "vaboraterraformstatee"
+    storage_account_name = "keerthiterraformstate2026"
     container_name       = "tfstate"
     key                  = "banking-app.tfstate"
   }
