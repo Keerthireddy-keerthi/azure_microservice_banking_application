@@ -1,5 +1,5 @@
 output "resource_group_name" {
-  value = azurerm_resource_group.data.name
+  value = azurerm_resource_group.dataa.name
 }
 
 output "aks_cluster_name" {
